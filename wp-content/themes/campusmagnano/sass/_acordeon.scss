@@ -1,0 +1,70 @@
+.acordeon {
+    max-width: 600px;
+    margin: auto;
+    
+}
+
+// Variables
+$color-fondo-summary: #f2f2f2;
+$color-fondo-contenido: #f2f2f2;
+$color-borde: #f2f2f2;
+$tamano-flecha: 20px;
+
+
+   
+  details summary {
+    
+    transition: margin 150ms ease-out;
+  }
+  
+  details[open] summary {
+    
+  }
+.acordeon {
+    font-family: $font-primary;
+    details {
+        margin-bottom: 10px;
+        border: 1px solid $color-borde;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #f2f2f2;
+        
+        ul {
+            padding: 0 10px 10px;
+            background: #f2f2f2;
+            font-family: $font-primary;
+        } 
+        summary {
+            padding: 10px;
+            background-color: $color-fondo-summary;
+            cursor: pointer;
+            outline: none;
+            position: relative;
+            background-repeat: no-repeat;
+            background-size: $tamano-flecha;
+            background-position: right 10px center;
+            background-image: url('../images/plus.svg'); 
+            background-size: 15px;
+            list-style: none; /* Elimina el estilo de lista predeterminado, que incluye la flecha */
+            cursor: pointer; /* Cambia el cursor para indicar que es interactivo */           
+            
+            span {
+                font-weight: bold;
+                color: #555;
+                line-height: 16px;
+            }
+        }
+
+        p {
+            padding: 10px;
+            background-color: $color-fondo-contenido;
+            margin: 0;
+            font-family: $font-primary;
+            font-weight: 300;
+        }
+    }
+    details[open] summary {
+        background-image: url('../images/less.svg');
+    }    
+}
+

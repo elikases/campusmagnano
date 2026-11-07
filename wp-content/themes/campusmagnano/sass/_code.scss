@@ -1,0 +1,79 @@
+body.mycode {
+    overflow: hidden;
+}
+.iscode {
+    position: absolute;
+    width: 100%;
+    height: min-content;
+    display: block;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-width: 320px;
+    display: none;
+}
+
+#validate-code, #validate-code2, #validate-code3 {
+    position: absolute;
+    gap: 10px;
+    padding: 20px;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f2f2f2;
+    filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
+    border-radius: 10px;
+    border: 1px solid #555;
+    h3 {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 400;
+        color: $color-primary;
+    }
+    input.code {
+        background: #FFF;
+        height: 40px;
+        padding: 10px;
+        font-size: 16px;
+        max-width: 100px;
+        border: 1px solid #f4f4f4;
+        border-radius: 4px;
+        &:focus {
+            filter: drop-shadow(0px 0px 1px rgba(0,0,0,0.3));
+        }
+    }
+    input[type="submit"] {
+        background: $color-primary;
+        padding: 10px;
+        color: #FFF;
+        font-size: 18px;
+        border-radius: 10px;
+        border: 1px solid $color-primary;
+        &:hover {
+            background: #FFF;
+            color: $color-primary;
+            cursor: pointer;
+            border: 1px solid $color-primary;
+            @include tablet {
+                background: $color-primary;
+                color: #fff;
+                cursor: pointer;
+                border: 1px solid $color-primary;            
+            }            
+        }
+
+    }
+    .errormsgcode {
+        color: #fff;
+        background-color: #ff0000;
+        padding: 7px;
+        opacity: 0.8;
+        font-size: 16px;
+        display: none;
+    }
+}

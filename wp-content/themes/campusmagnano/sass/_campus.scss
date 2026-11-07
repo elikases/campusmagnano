@@ -1,0 +1,158 @@
+.campus {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        @include mobile {
+            //  flex-direction: column;
+
+        }
+        .fecha {
+            flex-grow: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin-right: -20px;
+            background: url(../images/girl.svg) no-repeat 80px top;
+            background-size: 70%;
+            align-items: start;
+            padding: 30px 40px;
+            justify-content: end;
+            @include mobile {
+                width: 50%;
+            }
+
+            &::after {
+                display: block;
+                position: absolute;
+                left: 0;
+                z-index: 1;
+                background: linear-gradient(96deg, #f2f2f2, #f2f2f2 20px, white 20px, white);
+                content: "";
+                width: 20px;
+                height: 100%;
+                top: 0;
+                @include mobile {
+                    background: none;
+                    display: none;
+                }
+            }
+            &::before {
+                display: block;
+                position: absolute;
+                right: 0;
+                z-index: 1;
+                background: linear-gradient(276deg, #f2f2f2, #f2f2f2 20px, white 20px, white);
+                content: "";
+                width: 20px;
+                height: 100%;
+                top: 0;
+                @include mobile {
+                    background: none;
+                    display: none;
+                }                
+            }            
+
+            .titulo, .city {
+                color: $color-primary;
+                font-weight: bold;
+                text-align: center;
+                font-size: 28px;
+                line-height: 28px;
+                @include tablet {
+                    font-size: 18px;
+                    line-height: 18px;
+                }
+                @include mobile {
+                    font-size: 16px;
+                    line-height: 16px;
+                }
+            }
+            .titulo, .city {
+                background: -webkit-linear-gradient(orange,$color-primary);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                color: $color-primary;                  
+            }
+            .date {
+                color: $color-primary;
+                margin: 5px 0;
+                @include tablet {
+                    font-size: 14px;
+                    line-height: 14px;
+                    margin: 10px;
+                }
+                @include mobile {
+                    margin: 5px 0;
+                    color: #000;
+                    font-size: 12px;
+                }
+            }
+            align-items: start;
+            padding: 30px 40px;
+            &:nth-child(odd) {
+
+            }
+            @include mobile {
+                margin-right: 0;
+                padding: 12px;
+                align-items: center;
+            }
+            &:nth-child(odd){
+                background: #f2f2f2;
+                align-items: end;
+                padding: 30px 50px;
+                background: #f2f2f2 $boy right -100px;
+                background-size: 100%;
+                
+                @include tablet {
+                    padding: 30px;
+                }
+                @include mobile {
+                    padding: 12px;
+                    align-items: center;
+                }
+                &::after, &::before {
+                    display: none;
+                }
+            }
+            &:nth-child(3){
+                background: #f2f2f2 $girl right bottom;
+                background-size: 200%;
+            }            
+        }
+        .btn {
+            width: min-content;
+            background-color: $color-primary;
+            color: #FFF;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-weight: bolder;
+            border: 1px solid $color-primary;
+            font-size: 20px;
+            background: -webkit-linear-gradient(#fe9646,$color-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #f2f2f2;
+            @include tablet {
+                font-size: 16px;
+               
+            }
+            @include mobile {
+                font-size: 14px;
+                
+            }
+            &:hover {
+                background: #FFF;
+                color: $color-primary;
+                background: -webkit-linear-gradient($color-primary,#fe9646);
+                color: #FFF;
+                -webkit-text-fill-color: #FFF;
+                filter: drop-shadow(0px 0px 2px $color-primary);
+            }
+        }
+}
+
+
+

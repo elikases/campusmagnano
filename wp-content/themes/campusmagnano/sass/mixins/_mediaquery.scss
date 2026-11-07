@@ -1,0 +1,31 @@
+/* mediaquery */
+@mixin desktopup {
+  @media only screen and (max-width: 1600px) {
+    @content;
+  }
+}
+@mixin desktop {
+  @media only screen and (max-width: 1200px) {
+    @content;
+  }
+}
+@mixin laptop {
+  @media only screen and (max-width: 960px) {
+    @content;
+  }
+}
+@mixin tablet {
+  @media only screen and (max-width: 768px) {
+    @content;
+  }
+}
+@mixin mobile {
+  @media only screen and (max-width: 480px) {
+    @content;
+  }
+}
+@mixin minimobile {
+  @media only screen and (max-width: 320px) {
+    @content;
+  }
+}

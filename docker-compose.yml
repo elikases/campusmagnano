@@ -1,33 +1,69 @@
-version: '3.8'
-
 services:
   db:
     image: mariadb:10.6.4-focal
+    container_name: campusmagnano-db
     command: '--default-authentication-plugin=mysql_native_password'
     volumes:
       - db_data:/var/lib/mysql
-    restart: always
+    restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD=somewordpress
-      - MYSQL_DATABASE=wordpress
-      - MYSQL_USER=wordpress
-      - MYSQL_PASSWORD=wordpress
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
     expose:
       - 3306
       - 33060
 
   wordpress:
-    image: wordpress:latest
+    # La version de WP del tag NO es la que corre: el repo se monta encima del
+    # docroot, asi que el core sale de wp-includes/ del repo (6.9.11, igual que
+    # produccion). Este tag solo fija PHP/Apache y sus extensiones.
+    image: wordpress:6.6.1-php8.2-apache
+    container_name: campusmagnano-wp
+    depends_on:
+      - db
     volumes:
-      - ./campusmagnano:/var/www/html  # Monta tu directorio local de WordPress aquí
+      # El repo completo es el WordPress: se monta en la raiz del docroot
+      - .:/var/www/html
     ports:
-      - 80:80
-    restart: always
+      - "8080:80"
+    restart: unless-stopped
     environment:
-      - WORDPRESS_DB_HOST=db
-      - WORDPRESS_DB_USER=wordpress
-      - WORDPRESS_DB_PASSWORD=wordpress
-      - WORDPRESS_DB_NAME=wordpress
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      # wp-config.php hace eval() de esto (linea 121).
+      # La URL del sitio sigue al host por el que entras (localhost, IP de LAN, *.local),
+      # asi no hay redirects cruzados ni cookies de dominio equivocado.
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('SCRIPT_DEBUG', true);
+        $$cm_host = $$_SERVER['HTTP_HOST'] ?? 'localhost:8080';
+        if (preg_match('/^(localhost|[0-9]{1,3}(\.[0-9]{1,3}){3}|[A-Za-z0-9-]+\.local)(:[0-9]{1,5})?$$/', $$cm_host)) {
+            $$cm_scheme = (!empty($$_SERVER['HTTPS']) && $$_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            define('WP_HOME', $$cm_scheme . '://' . $$cm_host);
+            define('WP_SITEURL', $$cm_scheme . '://' . $$cm_host);
+        }
+
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: campusmagnano-cli
+    depends_on:
+      - db
+      - wordpress
+    user: "33:33"
+    volumes:
+      - .:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    entrypoint: ["tail", "-f", "/dev/null"]
 
 volumes:
   db_data:

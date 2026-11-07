@@ -1,0 +1,23 @@
+.social {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    .facebook {
+        background: $facebook;
+    }
+    .instagram {
+        background: $instagram;
+    }
+    .x {
+        background: $x;
+    }       
+    .facebook, .instagram, .x {
+        height: $ico-size;
+        width: $ico-size;
+        display: block;    
+        @include tablet {
+            height: $ico-size-t;
+            width: $ico-size-t;                
+        }
+    }
+}

@@ -10,25 +10,44 @@
  */
 
 ?>
+    <footer>
+        <div class="wrap">
+            <a href="#" class="logo"></a>
+            <small>
 
-	<footer id="colophon" class="site-footer">
-		<div class="site-info">
-			<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'campusmagnano' ) ); ?>">
-				<?php
-				/* translators: %s: CMS name, i.e. WordPress. */
-				printf( esc_html__( 'Proudly powered by %s', 'campusmagnano' ), 'WordPress' );
-				?>
-			</a>
-			<span class="sep"> | </span>
-				<?php
-				/* translators: 1: Theme name, 2: Theme author. */
-				printf( esc_html__( 'Theme: %1$s by %2$s.', 'campusmagnano' ), 'campusmagnano', '<a href="http://underscores.me/">Underscores.me</a>' );
-				?>
-		</div><!-- .site-info -->
-	</footer><!-- #colophon -->
+Consultas e información: Franco Zecchin · +54 9 351 328-1636
+
+</small>
+<!--             <small>Copyright © 2024 campusmagnano.com. Franco Zecchin: +54 9 351 328-1636</small> -->
+            <div class="social">
+                <a class="x" href="https://x.com/CampusMagnano?lang=es&mx=2" target="_blank"></a>
+                <a class="facebook" href="https://www.facebook.com/campus.magnano/" target="_blank"></a>
+                <a class="instagram" href="https://www.instagram.com/campusmagnano/" target="_blank"></a>
+            </div>
+        </div>
+    </footer>
+
 </div><!-- #page -->
 
 <?php wp_footer(); ?>
 
 </body>
 </html>
+<script>
+    // Selecciona el interruptor
+    const themeSwitch = document.getElementById('themeSwitch');
+
+    // Verifica el estado del switch cuando se carga la página
+    document.addEventListener('DOMContentLoaded', () => {
+        // Comprueba si el body tiene la clase 'dark' al cargar la página
+        if (document.body.classList.contains('dark')) {
+            themeSwitch.checked = true;
+        }
+    });
+
+    // Agrega un evento de cambio al switch
+    themeSwitch.addEventListener('change', () => {
+        // Alterna la clase 'dark' en el body
+        document.body.classList.toggle('dark');
+    });
+</script>

@@ -2,3 +2,8 @@
 wp-content/.DS_Store
 wp-content/themes/.DS_Store
 wp-content/themes/twentytwentyfour/.DS_Store
+# Dependencias y artefactos de desarrollo
+node_modules/
+wp-content/debug.log
+wp-content/upgrade/
+wp-content/uploads/

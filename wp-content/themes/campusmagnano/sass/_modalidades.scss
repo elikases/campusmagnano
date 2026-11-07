@@ -1,0 +1,52 @@
+.modalidades {
+    padding: 10px 40px 40px;
+    background: #f2f2f2;
+    display: grid;
+    grid-template-columns: 1fr max-content max-content;
+    align-items: center;
+    gap: 0 20px;
+    @include tablet {
+        grid-template-columns: 1fr min-content min-content;
+        padding: 20px;
+        
+    }
+    @include mobile {
+        padding: 10px;
+        gap: 0 10px;
+
+    }
+    .row {
+       display: contents;
+       background: #FFF;
+      &:first-child {
+        font-weight: 500;
+        span {
+            margin-bottom: 10px;
+            font-size: 16px;
+            @include mobile {
+                font-size: 14px;
+                line-height: 16px;
+            }
+        }
+        @include tablet {
+            line-height: 20px;
+            text-align: center;
+            
+        }
+      }
+        p {
+            padding: 0;
+        
+        }
+        .si, .no {
+            width: 16px;
+            height: 14px;
+            margin: auto;
+            display: block;
+        }
+        .si {
+            background: $i-ok;
+            
+        }
+    }
+}

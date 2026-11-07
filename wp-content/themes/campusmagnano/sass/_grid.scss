@@ -1,0 +1,16 @@
+body {
+    min-width: 320px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+}
+
+.wrap {
+    margin: 0 $grid-wrap-margin;
+    @include tablet {
+        margin: 0 20px;
+    }
+    @include mobile {
+        margin: 0 15px;
+    }
+}
