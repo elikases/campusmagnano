@@ -13,6 +13,7 @@
 <!doctype html>
 <html <?php language_attributes(); ?>>
 <head>
+<?php if ( 'production' === wp_get_environment_type() ) : ?>
     <!-- Facebook Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
@@ -32,6 +33,7 @@
     &noscript=1"/>
     </noscript>
     <!-- End Facebook Pixel Code -->
+<?php endif; ?>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--<link rel="profile" href="https://gmpg.org/xfn/11">-->

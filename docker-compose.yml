@@ -42,6 +42,11 @@ services:
         define('WP_DEBUG_LOG', true);
         define('WP_DEBUG_DISPLAY', false);
         define('SCRIPT_DEBUG', true);
+        // Marca el entorno como de desarrollo. header.php lo consulta para no
+        // disparar el pixel de Facebook desde local y ensuciar las metricas.
+        // Produccion no define nada y wp_get_environment_type() cae a
+        // 'production' por defecto, asi que alla el pixel sigue activo.
+        define('WP_ENVIRONMENT_TYPE', 'development');
         $$cm_host = $$_SERVER['HTTP_HOST'] ?? 'localhost:8080';
         if (preg_match('/^(localhost|[0-9]{1,3}(\.[0-9]{1,3}){3}|[A-Za-z0-9-]+\.local)(:[0-9]{1,5})?$$/', $$cm_host)) {
             $$cm_scheme = (!empty($$_SERVER['HTTPS']) && $$_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
