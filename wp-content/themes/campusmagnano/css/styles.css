@@ -767,3 +767,424 @@ body.mycode {
 .whatsapp:hover {
   filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.2));
 }
+
+/* -------------------------------------------------------------------------
+ * Slider de placas (pagina /demo)
+ *
+ * El bloque se llama .carrusel y no .slider porque _switch.scss ya usa .slider
+ * para el switch de tema oscuro, que vive en el header de todas las paginas.
+ *
+ * Namespace propio: NO reutiliza .fecha de _campus.scss. Aquella clase cablea
+ * margenes negativos y fondos por nth-child pensados para una fila fija de 5,
+ * y dentro de un viewport con scroll-snap pelean con el desplazamiento. La
+ * tipografia se repite a proposito: es mas barato que acoplar el demo a la
+ * portada.
+ * ---------------------------------------------------------------------- */
+.carrusel {
+  position: relative;
+  margin-bottom: 30px;
+  /* --visibles-desktop llega inline desde la plantilla (opcion del admin).
+   * No se puede sobreescribir una custom property inline desde una media
+   * query, asi que la que consume el layout es --visibles, derivada de ella.
+   */
+  --visibles: var(--visibles-desktop, 3);
+}
+@media only screen and (max-width: 768px) {
+  .carrusel {
+    --visibles: 2;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .carrusel {
+    --visibles: 1;
+  }
+}
+
+.carrusel__viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* La barra se oculta: el desplazamiento se hace con flechas, dots o swipe. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.carrusel__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.carrusel__track {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.carrusel__slide {
+  flex: 0 0 calc(100% / var(--visibles));
+  scroll-snap-align: start;
+  display: flex;
+  min-width: 0;
+}
+
+/* Menos placas que huecos: no hay nada que desplazar, se centran. */
+.carrusel--pocas .carrusel__viewport {
+  scroll-snap-type: none;
+}
+.carrusel--pocas .carrusel__track {
+  justify-content: center;
+}
+
+.carrusel__vacio {
+  text-align: center;
+  margin: 40px 0;
+}
+
+/* -------------------------------------------------------------------------
+ * La placa
+ * ---------------------------------------------------------------------- */
+.placa {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 340px;
+  overflow: hidden;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: start;
+  text-align: center;
+  padding: 30px 40px;
+  background: #f2f2f2;
+  background-size: cover;
+}
+@media only screen and (max-width: 768px) {
+  .placa {
+    min-height: 300px;
+    padding: 30px;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .placa {
+    min-height: 260px;
+    padding: 12px;
+    align-items: center;
+  }
+}
+
+/* Sin imagen propia la placa conserva el aspecto de la portada: alterna las
+ * ilustraciones del theme segun la posicion. */
+.carrusel__slide:nth-child(even) .placa:not(.placa--con-imagen) {
+  background: #fff url(../images/girl.svg) no-repeat 80px top;
+  background-size: 70%;
+}
+
+.carrusel__slide:nth-child(odd) .placa:not(.placa--con-imagen) {
+  background: #f2f2f2 url(../images/boy.svg) no-repeat right -100px;
+  background-size: 100%;
+  align-items: end;
+}
+@media only screen and (max-width: 480px) {
+  .carrusel__slide:nth-child(odd) .placa:not(.placa--con-imagen) {
+    align-items: center;
+  }
+}
+
+.carrusel__slide:nth-child(3) .placa:not(.placa--con-imagen) {
+  background: #f2f2f2 url(../images/girl.svg) no-repeat right bottom;
+  background-size: 200%;
+}
+
+/* Imagen propia: entra por custom property para no escribir una regla inline. */
+.placa--con-imagen {
+  background-image: var(--placa-img);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Velo de contraste. Sobre una foto cualquiera el texto naranja desaparece; la
+ * portada se puede permitir no tenerlo porque sus fondos son ilustraciones
+ * planas que el theme controla. */
+.placa--texto.placa--con-imagen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2) 55%, rgba(0, 0, 0, 0));
+  z-index: 1;
+}
+
+.placa--texto > * {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+/* Cubre la placa entera por encima del texto, por debajo del boton. */
+.placa__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+}
+
+.placa__titulo,
+.placa__city {
+  color: #f37c20;
+  font-weight: bold;
+  text-align: center;
+  font-size: 28px;
+  line-height: 28px;
+  background: -webkit-linear-gradient(orange, #f37c20);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@media only screen and (max-width: 768px) {
+  .placa__titulo,
+  .placa__city {
+    font-size: 18px;
+    line-height: 18px;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .placa__titulo,
+  .placa__city {
+    font-size: 16px;
+    line-height: 16px;
+  }
+}
+
+.placa__date {
+  color: #f37c20;
+  margin: 5px 0;
+}
+@media only screen and (max-width: 768px) {
+  .placa__date {
+    font-size: 14px;
+    line-height: 14px;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .placa__date {
+    font-size: 12px;
+  }
+}
+
+/* Sobre imagen, el degradado naranja no se lee: texto blanco. */
+.placa--con-imagen .placa__titulo,
+.placa--con-imagen .placa__city {
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+.placa--con-imagen .placa__date {
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+.placa__btn {
+  position: relative;
+  z-index: 4;
+  align-self: center;
+  width: min-content;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: 1px solid #f37c20;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bolder;
+  white-space: nowrap;
+  text-decoration: none;
+  background: -webkit-linear-gradient(#fe9646, #f37c20);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #f2f2f2;
+}
+@media only screen and (max-width: 768px) {
+  .placa__btn {
+    font-size: 16px;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .placa__btn {
+    font-size: 14px;
+  }
+}
+.placa__btn:hover, .placa__btn:focus-visible {
+  background: -webkit-linear-gradient(#f37c20, #fe9646);
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  filter: drop-shadow(0 0 2px #f37c20);
+}
+
+/* Modo solo imagen: la placa entera es el enlace. */
+.placa--imagen {
+  padding: 0;
+}
+.placa--imagen img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* -------------------------------------------------------------------------
+ * Controles
+ * ---------------------------------------------------------------------- */
+.carrusel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f37c20;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+.carrusel__arrow::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-top: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+.carrusel__arrow:hover:not(:disabled) {
+  background: #f37c20;
+  color: #fff;
+}
+.carrusel__arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+@media only screen and (max-width: 480px) {
+  .carrusel__arrow {
+    top: auto;
+    bottom: -52px;
+    transform: none;
+  }
+}
+
+.carrusel__arrow--prev {
+  left: 8px;
+}
+.carrusel__arrow--prev::before {
+  transform: rotate(-135deg);
+  margin-left: -3px;
+}
+@media only screen and (max-width: 480px) {
+  .carrusel__arrow--prev {
+    left: calc(50% - 60px);
+  }
+}
+
+.carrusel__arrow--next {
+  right: 8px;
+}
+.carrusel__arrow--next::before {
+  transform: rotate(45deg);
+  margin-right: -3px;
+}
+@media only screen and (max-width: 480px) {
+  .carrusel__arrow--next {
+    right: calc(50% - 60px);
+  }
+}
+
+.carrusel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+@media only screen and (max-width: 480px) {
+  .carrusel__dots {
+    margin-top: 64px;
+  }
+}
+
+.carrusel__dot {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 1px solid #f37c20;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.carrusel__dot[aria-selected=true] {
+  background: #f37c20;
+}
+.carrusel__dot:hover {
+  background: #f37c20;
+  opacity: 0.6;
+}
+
+/* Area tactil de 44px sin agrandar el punto visible. */
+.carrusel__dot::after {
+  content: "";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+.carrusel__dots {
+  position: relative;
+}
+
+/* -------------------------------------------------------------------------
+ * Tema oscuro
+ * ---------------------------------------------------------------------- */
+body.dark .placa:not(.placa--con-imagen) .placa__titulo,
+body.dark .placa:not(.placa--con-imagen) .placa__city,
+body.dark .placa:not(.placa--con-imagen) .placa__date {
+  color: #000;
+  -webkit-text-fill-color: #000;
+}
+body.dark .placa__btn {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  filter: none;
+}
+body.dark .placa__btn:hover, body.dark .placa__btn:focus-visible {
+  background: #fff;
+  color: #000;
+  -webkit-text-fill-color: #000;
+}
+body.dark .carrusel__arrow {
+  color: #000;
+}
+body.dark .carrusel__arrow:hover:not(:disabled) {
+  background: #000;
+  color: #fff;
+}
+body.dark .carrusel__dot {
+  border-color: #000;
+}
+body.dark .carrusel__dot[aria-selected=true] {
+  background: #000;
+}
+
+/* -------------------------------------------------------------------------
+ * Menos movimiento
+ * ---------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .carrusel__viewport {
+    scroll-behavior: auto;
+  }
+}

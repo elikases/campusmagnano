@@ -162,4 +162,20 @@ cm_seed(
 	)
 );
 
+echo "== pagina del demo del slider ==\n";
+
+// La plantilla page-demo.php se aplica sola por la jerarquia de WordPress
+// (page-{slug}.php), pero se asigna igual con _wp_page_template para que
+// is_page_template() sea true y la pagina se pueda mover a otro slug.
+cm_seed(
+	'page',
+	'Demo Slider',
+	'demo',
+	'2026-11-07 10:00:00',
+	'',
+	array(
+		'_wp_page_template' => 'page-demo.php',
+	)
+);
+
 echo "LISTO\n";

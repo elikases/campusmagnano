@@ -79,6 +79,7 @@ prácticamente no aporta estilos. El diseño real está todo en `css/styles.css`
 | Archivo | Qué renderiza |
 |---|---|
 | `home.php` | La portada completa (fechas, acordeón, coachs, modalidades) |
+| `page-demo.php` | La página `/demo`: las placas en un carrusel (ver más abajo) |
 | `single-event.php` | El detalle de cada fecha, con el formulario de inscripción |
 | `header.php` / `footer.php` | Cabecera con logo y switch de tema oscuro; pie con redes |
 | `functions.php` | Registra los 4 custom post types y sus meta boxes |
@@ -88,6 +89,33 @@ El resto (`index.php`, `single.php`, `page.php`, `archive.php`, `search.php`,
 
 La portada se sirve por `home.php` porque WordPress la trata como el índice de
 entradas. No existe `front-page.php`.
+
+## Página de demo: placas administrables y slider
+
+`http://localhost:8080/demo` — una copia paralela de la sección de fechas de la
+portada, con las placas en un carrusel. **La portada no se toca**: sirve para
+mostrarle una propuesta al cliente sin tocar lo que está publicado.
+
+Lo que se puede administrar sin tocar código:
+
+| Dónde | Qué |
+|---|---|
+| Cada fecha → "Imagen de la placa" | Sube la imagen de fondo de esa placa (vertical, 720×960 px o más) |
+| Cada fecha → "Mostrar en la placa" | Imagen de fondo + texto, o sólo la imagen (clickeable) |
+| Página "Demo Slider" → "Opciones del slider" | Placas por vista, flechas, puntos, vuelta al final, movimiento automático e intervalo |
+
+En los dos modos, el clic en cualquier punto de la placa lleva al mismo lugar
+que el botón "Participar": el formulario de esa fecha.
+
+Si una fecha no tiene imagen, la placa se ve como en la portada. Si está en modo
+"sólo la imagen" pero no tiene imagen, cae a modo texto.
+
+Archivos de la feature: `page-demo.php`, `inc/placas.php`, `js/carrusel.js` y
+`sass/_carrusel.scss`. La spec completa, con las decisiones y su porqué, está en
+`docs/spec-slider-placas.md`.
+
+El bloque CSS se llama `.carrusel` y no `.slider` porque `_switch.scss` ya usa
+`.slider` para el switch de tema oscuro del header.
 
 ## Arreglado acá, pendiente de desplegar
 

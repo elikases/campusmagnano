@@ -146,6 +146,15 @@ function campusmagnano_scripts() {
     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
         wp_enqueue_script( 'comment-reply' );
     }
+
+    // El slider solo se usa en la pagina del demo. El CSS no se encola aparte:
+    // el theme sirve un unico css/styles.css cableado en header.php.
+    // Se chequean las dos vias: is_page_template() solo es true si la pagina
+    // tiene la plantilla asignada a mano, pero la jerarquia de WordPress sirve
+    // page-demo.php a la pagina con slug `demo` igual, sin asignarla.
+    if ( is_page_template( 'page-demo.php' ) || is_page( 'demo' ) ) {
+        wp_enqueue_script( 'campusmagnano-carrusel', get_template_directory_uri() . '/js/carrusel.js', array(), _S_VERSION, true );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'campusmagnano_scripts' );
 
@@ -168,6 +177,12 @@ require get_template_directory() . '/inc/template-functions.php';
  * Customizer additions.
  */
 require get_template_directory() . '/inc/customizer.php';
+
+/**
+ * Placas administrables (imagen propia + modo de visualizacion) y opciones del
+ * slider de la pagina /demo. La portada no usa nada de esto.
+ */
+require get_template_directory() . '/inc/placas.php';
 
 /**
  * Load Jetpack compatibility file.
