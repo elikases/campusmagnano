@@ -265,7 +265,7 @@ function crear_post_type_coachs() {
         'public' => true,
         'has_archive' => true,
         'supports' => array('title', 'editor', 'thumbnail'), // Personaliza los soportes según lo que necesites
-        'rewrite' => array('slug' => 'modalidades'),
+        'rewrite' => array('slug' => 'coachs'),
     );
 
     register_post_type('coachs', $args);

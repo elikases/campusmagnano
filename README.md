@@ -89,18 +89,36 @@ El resto (`index.php`, `single.php`, `page.php`, `archive.php`, `search.php`,
 La portada se sirve por `home.php` porque WordPress la trata como el índice de
 entradas. No existe `front-page.php`.
 
-## Deuda conocida
+## Arreglado acá, pendiente de desplegar
 
-- **El `css/styles.css` de producción está desincronizado de su `sass/`.** En el
-  servidor, `_grid.scss` quedó vacío y `_whatsapp.scss` apunta a un PNG que el
-  CSS compilado todavía no refleja. Acá ya está reconciliado: compilar reproduce
-  el diseño de producción *y* arregla el ícono de WhatsApp, que en el sitio en
-  vivo no se ve porque el CSS apunta a un SVG de 0 bytes. **Al desplegar el
-  `css/styles.css` de este repo, ese ícono se arregla.**
-- `_whatsapp.scss` referencia el PNG con una URL absoluta a `campusmagnano.com`.
-  Conviene moverlo a `images/` y usar una ruta relativa como el resto.
-- Los CPT `coachs` y `modalidades` comparten el mismo `rewrite slug`
-  (`modalidades`) en `functions.php`, lo que hace que las URLs de uno pisen al
-  otro.
+Estos bugs existen en el sitio en vivo y ya están corregidos en este repo. Se
+resuelven al desplegar:
+
+- **El ícono flotante de WhatsApp no se ve.** El `css/styles.css` de producción
+  apunta a un `images/whatsapp.svg` de 0 bytes. Acá el PNG está en `images/` y
+  se escala con `background-size: contain` (el archivo es 128×128 y el botón
+  mide 64×64, así que sin eso se veía un cuarto de la imagen ampliado).
+- **`functions.php` emitía dos PHP warnings por request.** `my_enqueue_script()`
+  usaba `$post` sin declararlo global.
+- **Los CPT `coachs` y `modalidades` compartían el mismo `rewrite slug`.** Las
+  URLs de uno pisaban las del otro; los coachs quedaban en
+  `/modalidades/<slug>/`. Ahora `coachs` usa su propio slug. **Al desplegar, las
+  URLs viejas de coachs pasan a 404** — son páginas sin contenido y sin
+  plantilla propia, así que el impacto es mínimo, pero si alguna está indexada
+  conviene agregar un redirect.
+
+En producción, además, `css/styles.css` y `sass/` están desincronizados en ambas
+direcciones: `_grid.scss` quedó vacío en el servidor aunque sus reglas siguen
+en el CSS compilado. Acá ya está reconciliado — compilar reproduce el diseño de
+producción.
+
+## Deuda abierta
+
 - En producción no hay ningún menú de navegación funcional: los items quedaron
   huérfanos y en borrador.
+- `sass/_campus.scss` repite `align-items: start` y `padding: 30px 40px` dos
+  veces en el mismo bloque, y `.campus` arrastra un `display: none` que la línea
+  siguiente anula. Son restos sin efecto, pero confunden al leer.
+- El SCSS usa `@import`, que Dart Sass deprecó en favor de `@use`. Los scripts
+  silencian el aviso con `--silence-deprecation=import`. Migrar implica
+  renombrar las referencias a variables y mixins en los 19 parciales.
