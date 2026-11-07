@@ -240,7 +240,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			<span class="screen-reader-text">
 			<?php
 			/* translators: Hidden accessibility text. %s: User login. */
-			printf( __( 'Select %s' ), $user->user_login );
+			printf( __( 'Select %s' ), esc_html( $user->user_login ) );
 			?>
 			</span>
 		</label>
@@ -273,9 +273,9 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 
 		if ( current_user_can( 'edit_user', $user->ID ) ) {
 			$edit_link = esc_url( add_query_arg( 'wp_http_referer', urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ), get_edit_user_link( $user->ID ) ) );
-			$edit      = "<a href=\"{$edit_link}\">{$user->user_login}</a>";
+			$edit      = "<a href=\"{$edit_link}\">" . esc_html( $user->user_login ) . '</a>';
 		} else {
-			$edit = $user->user_login;
+			$edit = esc_html( $user->user_login );
 		}
 
 		?>
@@ -467,9 +467,25 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		$user = $item;
 
 		/** This filter is documented in wp-admin/includes/class-wp-users-list-table.php */
-		echo apply_filters( 'manage_users_custom_column', '', $column_name, $user->ID );
+		$column_output = apply_filters( 'manage_users_custom_column', '', $column_name, $user->ID );
+
+		/**
+		 * Filters the display output of custom columns in the Network Users list table.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param string $output      Custom column output. Default empty.
+		 * @param string $column_name Name of the custom column.
+		 * @param int    $user_id     ID of the currently-listed user.
+		 */
+		echo apply_filters( 'manage_users-network_custom_column', $column_output, $column_name, $user->ID );
 	}
 
+	/**
+	 * Generates the list table rows.
+	 *
+	 * @since 3.1.0
+	 */
 	public function display_rows() {
 		foreach ( $this->items as $user ) {
 			$class = '';

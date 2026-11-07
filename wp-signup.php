@@ -1,4 +1,11 @@
 <?php
+/**
+ * WordPress Signup Page
+ *
+ * Handles the user registration and site creation process for multisite installations.
+ *
+ * @package WordPress
+ */
 
 /** Sets up the WordPress Environment. */
 require __DIR__ . '/wp-load.php';
@@ -61,7 +68,7 @@ function wpmu_signup_stylesheet() {
 		.mu_register form { margin-top: 2em; }
 		.mu_register fieldset,
 			.mu_register legend { margin: 0; padding: 0; border: none; }
-		.mu_register .error { font-weight: 600; padding: 10px; color: #333; background: #ffebe8; border: 1px solid #c00; }
+		.mu_register .error { padding: 10px; color: #333; background: #ffebe8; border: 1px solid #c00; }
 		.mu_register input[type="submit"],
 			.mu_register #blog_title,
 			.mu_register #user_email,
@@ -556,7 +563,7 @@ function confirm_another_blog_signup( $domain, $path, $blog_title, $user_name, $
 				untrailingslashit( $domain . $path )
 			),
 			esc_url( $login_url ),
-			$user_name
+			esc_html( $user_name )
 		);
 		?>
 	</p>
@@ -989,7 +996,11 @@ if ( 'none' === $active_signup ) {
 			}
 			break;
 		case 'gimmeanotherblog':
-			validate_another_blog_signup();
+			if ( 'all' === $active_signup || 'blog' === $active_signup ) {
+				validate_another_blog_signup();
+			} else {
+				_e( 'Site registration has been disabled.' );
+			}
 			break;
 		case 'default':
 		default:

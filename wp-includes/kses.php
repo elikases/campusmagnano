@@ -109,10 +109,13 @@ if ( ! CUSTOM_TAGS ) {
 		),
 		'br'         => array(),
 		'button'     => array(
-			'disabled' => true,
-			'name'     => true,
-			'type'     => true,
-			'value'    => true,
+			'disabled'            => true,
+			'name'                => true,
+			'type'                => true,
+			'value'               => true,
+			'popovertarget'       => true,
+			'popovertargetaction' => true,
+			'aria-haspopup'       => true,
 		),
 		'caption'    => array(
 			'align' => true,
@@ -135,6 +138,9 @@ if ( ! CUSTOM_TAGS ) {
 			'valign'  => true,
 			'width'   => true,
 		),
+		'data'       => array(
+			'value' => true,
+		),
 		'del'        => array(
 			'datetime' => true,
 		),
@@ -143,9 +149,16 @@ if ( ! CUSTOM_TAGS ) {
 		'details'    => array(
 			'align' => true,
 			'open'  => true,
+			'name'  => true,
 		),
 		'div'        => array(
-			'align' => true,
+			'align'   => true,
+			'popover' => true,
+		),
+		'dialog'     => array(
+			'closedby' => true,
+			'open'     => true,
+			'popover'  => true,
 		),
 		'dl'         => array(),
 		'dt'         => array(),
@@ -234,6 +247,14 @@ if ( ! CUSTOM_TAGS ) {
 		'menu'       => array(
 			'type' => true,
 		),
+		'meter'      => array(
+			'high'    => true,
+			'low'     => true,
+			'max'     => true,
+			'min'     => true,
+			'optimum' => true,
+			'value'   => true,
+		),
 		'nav'        => array(
 			'align' => true,
 		),
@@ -253,6 +274,10 @@ if ( ! CUSTOM_TAGS ) {
 		'pre'        => array(
 			'width' => true,
 		),
+		'progress'   => array(
+			'max'   => true,
+			'value' => true,
+		),
 		'q'          => array(
 			'cite' => true,
 		),
@@ -263,6 +288,7 @@ if ( ! CUSTOM_TAGS ) {
 		'ruby'       => array(),
 		's'          => array(),
 		'samp'       => array(),
+		'search'     => array(),
 		'span'       => array(
 			'align' => true,
 		),
@@ -344,6 +370,9 @@ if ( ! CUSTOM_TAGS ) {
 			'charoff' => true,
 			'valign'  => true,
 		),
+		'time'       => array(
+			'datetime' => true,
+		),
 		'title'      => array(),
 		'tr'         => array(
 			'align'   => true,
@@ -362,7 +391,9 @@ if ( ! CUSTOM_TAGS ) {
 		'tt'         => array(),
 		'u'          => array(),
 		'ul'         => array(
-			'type' => true,
+			'type'    => true,
+			'popover' => true,
+			'role'    => true,
 		),
 		'ol'         => array(
 			'start'    => true,
@@ -382,6 +413,186 @@ if ( ! CUSTOM_TAGS ) {
 			'src'         => true,
 			'width'       => true,
 		),
+		'wbr'        => array(),
+	);
+
+	// https://www.w3.org/TR/mathml-core/#global-attributes
+	// Except common attributes added by _wp_add_global_attributes.
+	$math_global_attributes = array(
+		'displaystyle'   => true,
+		'scriptlevel'    => true,
+		'mathbackground' => true,
+		'mathcolor'      => true,
+		'mathsize'       => true,
+		// Common attributes also defined by _wp_add_global_attributes.
+		// We do not want to add all those global attributes though.
+		'class'          => true,
+		'data-*'         => true,
+		'dir'            => true,
+		'id'             => true,
+		'style'          => true,
+	);
+
+	$math_overunder_attributes = array(
+		'accentunder' => true,
+		'accent'      => true,
+	);
+
+	$allowedposttags = array_merge(
+		$allowedposttags,
+		array(
+			// https://www.w3.org/TR/mathml-core/#the-top-level-math-element
+			'math'          => array_merge(
+				$math_global_attributes,
+				array(
+					'display' => true,
+				)
+			),
+
+			// https://www.w3.org/TR/mathml-core/#token-elements
+			// https://www.w3.org/TR/mathml-core/#text-mtext
+			'mtext'         => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#the-mi-element
+			'mi'            => array_merge(
+				$math_global_attributes,
+				array(
+					'mathvariant' => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#number-mn
+			'mn'            => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#operator-fence-separator-or-accent-mo
+			'mo'            => array_merge(
+				$math_global_attributes,
+				array(
+					'form'          => true,
+					'fence'         => true,
+					'separator'     => true,
+					'lspace'        => true,
+					'rspace'        => true,
+					'stretchy'      => true,
+					'symmetric'     => true,
+					'maxsize'       => true,
+					'minsize'       => true,
+					'largeop'       => true,
+					'movablelimits' => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#space-mspace
+			'mspace'        => array_merge(
+				$math_global_attributes,
+				array(
+					'width'  => true,
+					'height' => true,
+					'depth'  => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#string-literal-ms
+			'ms'            => $math_global_attributes,
+
+			// https://www.w3.org/TR/mathml-core/#general-layout-schemata
+			// https://www.w3.org/TR/mathml-core/#horizontally-group-sub-expressions-mrow
+			'mrow'          => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#fractions-mfrac
+			'mfrac'         => array_merge(
+				$math_global_attributes,
+				array(
+					'linethickness' => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#radicals-msqrt-mroot
+			'msqrt'         => $math_global_attributes,
+			'mroot'         => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#style-change-mstyle
+			'mstyle'        => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#error-message-merror
+			'merror'        => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#adjust-space-around-content-mpadded
+			'mpadded'       => array_merge(
+				$math_global_attributes,
+				array(
+					'width'   => true,
+					'height'  => true,
+					'depth'   => true,
+					'lspace'  => true,
+					'voffset' => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#making-sub-expressions-invisible-mphantom
+			'mphantom'      => $math_global_attributes,
+
+			// https://www.w3.org/TR/mathml-core/#script-and-limit-schemata
+			// https://www.w3.org/TR/mathml-core/#subscripts-and-superscripts-msub-msup-msubsup
+			'msub'          => $math_global_attributes,
+			'msup'          => $math_global_attributes,
+			'msubsup'       => $math_global_attributes,
+			// https://www.w3.org/TR/mathml-core/#underscripts-and-overscripts-munder-mover-munderover
+			'munder'        => array_merge( $math_global_attributes, $math_overunder_attributes ),
+			'mover'         => array_merge( $math_global_attributes, $math_overunder_attributes ),
+			'munderover'    => array_merge( $math_global_attributes, $math_overunder_attributes ),
+			// https://www.w3.org/TR/mathml-core/#prescripts-and-tensor-indices-mmultiscripts
+			'mmultiscripts' => $math_global_attributes,
+			'mprescripts'   => $math_global_attributes,
+
+			// https://www.w3.org/TR/mathml-core/#tabular-math
+			// https://www.w3.org/TR/mathml-core/#table-or-matrix-mtable
+			'mtable'        => array_merge(
+				$math_global_attributes,
+				array(
+					// Non-standard, used by temml/katex.
+					// https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element/mtable
+					'columnalign'   => true,
+					'rowspacing'    => true,
+					'columnspacing' => true,
+					'align'         => true,
+					'rowalign'      => true,
+					'columnlines'   => true,
+					'rowlines'      => true,
+					'frame'         => true,
+					'framespacing'  => true,
+					'width'         => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#row-in-table-or-matrix-mtr
+			'mtr'           => array_merge(
+				$math_global_attributes,
+				array(
+					// Non-standard, used by temml/katex.
+					// https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element/mtr
+					'columnalign' => true,
+					'rowalign'    => true,
+				)
+			),
+			// https://www.w3.org/TR/mathml-core/#entry-in-table-or-matrix-mtd
+			'mtd'           => array_merge(
+				$math_global_attributes,
+				array(
+					'columnspan'  => true,
+					'rowspan'     => true,
+					// Non-standard, used by temml/katex.
+					// https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element/mtd
+					'columnalign' => true,
+					'rowalign'    => true,
+				)
+			),
+
+			// https://www.w3.org/TR/mathml-core/#semantics-and-presentation
+			'semantics'     => $math_global_attributes,
+			'annotation'    => array_merge(
+				$math_global_attributes,
+				array(
+					'encoding' => true,
+				)
+			),
+
+			// Non-standard but widely supported, used by temml/katex.
+			'menclose'      => array_merge(
+				$math_global_attributes,
+				array(
+					'notation' => true,
+				)
+			),
+		)
 	);
 
 	/**
@@ -895,9 +1106,11 @@ function wp_kses_allowed_html( $context = '' ) {
 			return $tags;
 
 		case 'user_description':
+		case 'pre_term_description':
 		case 'pre_user_description':
-			$tags             = $allowedtags;
-			$tags['a']['rel'] = true;
+			$tags                = $allowedtags;
+			$tags['a']['rel']    = true;
+			$tags['a']['target'] = true;
 			/** This filter is documented in wp-includes/kses.php */
 			return apply_filters( 'wp_kses_allowed_html', $tags, $context );
 
@@ -1340,6 +1553,21 @@ function wp_kses_attr_check( &$name, &$value, &$whole, $vless, $element, $allowe
 			$whole = '';
 			return false;
 		}
+	}
+
+	/*
+	 * An Interactivity API binding replaces an attribute value when the content is rendered,
+	 * after KSES has checked it. Where KSES restricts attribute values on an element, only
+	 * bindings of attributes it allows there with any value are kept.
+	 */
+	if (
+		str_starts_with( $name_low, 'data-wp-bind--' ) &&
+		_wp_kses_directive_binds_value_restricted_attribute( $name_low, $allowed_attr )
+	) {
+		$name  = '';
+		$value = '';
+		$whole = '';
+		return false;
 	}
 
 	if ( 'style' === $name_low ) {
@@ -1956,14 +2184,45 @@ function wp_kses_normalize_entities( $content, $context = 'html' ) {
 	// Disarm all entities by converting & to &amp;
 	$content = str_replace( '&', '&amp;', $content );
 
-	// Change back the allowed entities in our list of allowed entities.
+	/*
+	 * Decode any character references that are now double-encoded.
+	 *
+	 * It's important that the following normalizations happen in the correct order.
+	 *
+	 * At this point, all `&` have been transformed to `&amp;`. Double-encoded named character
+	 * references like `&amp;amp;` will be decoded back to their single-encoded form `&amp;`.
+	 *
+	 * First, numeric (decimal and hexadecimal) character references must be handled so that
+	 * `&amp;#09;` becomes `&#9;`. If the named character references were handled first, there
+	 * would be no way to know whether the double-encoded character reference had been produced
+	 * in this function or was the original input.
+	 *
+	 * Consider the two examples, first with named entity decoding followed by numeric
+	 * entity decoding. We'll use U+002E FULL STOP (.) in our example, this table follows the
+	 * string processing from left to right:
+	 *
+	 * | Input        | &-encoded        | Named ref double-decoded  | Numeric ref double-decoded |
+	 * | ------------ | ---------------- | ------------------------- | -------------------------- |
+	 * | `&#x2E;`     | `&amp;#x2E;`     | `&amp;#x2E;`              | `&#x2E;`                   |
+	 * | `&amp;#x2E;` | `&amp;amp;#x2E;` | `&amp;#x2E;`              | `&#x2E;`                   |
+	 *
+	 * Notice in the example above that different inputs result in the same result. The second case
+	 * was not normalized and produced HTML that is semantically different from the input.
+	 *
+	 * | Input        | &-encoded        |  Numeric ref double-decoded | Named ref double-decoded |
+	 * | ------------ | ---------------- | --------------------------- | ------------------------ |
+	 * | `&#x2E;`     | `&amp;#x2E;`     | `&#x2E;`                    | `&#x2E;`                 |
+	 * | `&amp;#x2E;` | `&amp;amp;#x2E;` | `&amp;amp;#x2E;`            | `&amp;#x2E;`             |
+	 *
+	 * Here, each input is normalized to an appropriate output.
+	 */
+	$content = preg_replace_callback( '/&amp;#(0*[1-9][0-9]{0,6});/', 'wp_kses_normalize_entities2', $content );
+	$content = preg_replace_callback( '/&amp;#[Xx](0*[1-9A-Fa-f][0-9A-Fa-f]{0,5});/', 'wp_kses_normalize_entities3', $content );
 	if ( 'xml' === $context ) {
 		$content = preg_replace_callback( '/&amp;([A-Za-z]{2,8}[0-9]{0,2});/', 'wp_kses_xml_named_entities', $content );
 	} else {
 		$content = preg_replace_callback( '/&amp;([A-Za-z]{2,8}[0-9]{0,2});/', 'wp_kses_named_entities', $content );
 	}
-	$content = preg_replace_callback( '/&amp;#(0*[0-9]{1,7});/', 'wp_kses_normalize_entities2', $content );
-	$content = preg_replace_callback( '/&amp;#[Xx](0*[0-9A-Fa-f]{1,6});/', 'wp_kses_normalize_entities3', $content );
 
 	return $content;
 }
@@ -2081,7 +2340,19 @@ function wp_kses_normalize_entities3( $matches ) {
 /**
  * Determines if a Unicode codepoint is valid.
  *
+ * The definition of a valid Unicode codepoint is taken from the XML definition:
+ *
+ * > Characters
+ * >
+ * > …
+ * > Legal characters are tab, carriage return, line feed, and the legal characters of
+ * > Unicode and ISO/IEC 10646.
+ * > …
+ * > Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+ *
  * @since 2.7.0
+ *
+ * @see https://www.w3.org/TR/xml/#charsets
  *
  * @param int $i Unicode codepoint.
  * @return bool Whether or not the codepoint is a valid Unicode codepoint.
@@ -2089,10 +2360,18 @@ function wp_kses_normalize_entities3( $matches ) {
 function valid_unicode( $i ) {
 	$i = (int) $i;
 
-	return ( 0x9 === $i || 0xa === $i || 0xd === $i ||
-		( 0x20 <= $i && $i <= 0xd7ff ) ||
-		( 0xe000 <= $i && $i <= 0xfffd ) ||
-		( 0x10000 <= $i && $i <= 0x10ffff )
+	return (
+		0x9 === $i || // U+0009 HORIZONTAL TABULATION (HT)
+		0xA === $i || // U+000A LINE FEED (LF)
+		0xD === $i || // U+000D CARRIAGE RETURN (CR)
+		/*
+		 * The valid Unicode characters according to the XML specification:
+		 *
+		 * > any Unicode character, excluding the surrogate blocks, FFFE, and FFFF.
+		 */
+		( 0x20 <= $i && $i <= 0xD7FF ) ||
+		( 0xE000 <= $i && $i <= 0xFFFD ) ||
+		( 0x10000 <= $i && $i <= 0x10FFFF )
 	);
 }
 
@@ -2365,6 +2644,7 @@ function kses_init() {
  * @since 6.4.0 Added support for `writing-mode`.
  * @since 6.5.0 Added support for `background-repeat`.
  * @since 6.6.0 Added support for `grid-column`, `grid-row`, and `container-type`.
+ * @since 6.9.0 Added support for `white-space`.
  *
  * @param string $css        A string of CSS rules.
  * @param string $deprecated Not used.
@@ -2457,6 +2737,7 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 			'text-decoration',
 			'text-indent',
 			'text-transform',
+			'white-space',
 
 			'height',
 			'min-height',
@@ -2526,6 +2807,7 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 			'list-style-type',
 			'object-fit',
 			'object-position',
+			'opacity',
 			'overflow',
 			'vertical-align',
 			'writing-mode',
@@ -2659,11 +2941,16 @@ function safecss_filter_attr( $css, $deprecated = '' ) {
 				$css_test_string
 			);
 
+			// Bail if the recursive function stripping hit a PCRE error (e.g. stack/backtrack limit).
+			if ( null === $css_test_string ) {
+				continue;
+			}
+
 			/*
 			 * Disallow CSS containing \ ( & } = or comments, except for within url(), var(), calc(), etc.
 			 * which were removed from the test string above.
 			 */
-			$allow_css = ! preg_match( '%[\\\(&=}]|/\*%', $css_test_string );
+			$allow_css = 0 === preg_match( '%[\\\(&=}]|/\*%', $css_test_string );
 
 			/**
 			 * Filters the check for unsafe CSS in `safecss_filter_attr`.
@@ -2773,6 +3060,92 @@ function _wp_kses_allow_pdf_objects( $url ) {
 		|| str_starts_with( $url, "https://$upload_host$upload_port/" )
 	) {
 		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Determines whether KSES restricts the value of any attribute of an element.
+ *
+ * An attribute rule other than `required` and `valueless` restricts the value itself,
+ * for example `values` or `value_callback`.
+ *
+ * @since 6.9.11
+ * @access private
+ * @ignore
+ *
+ * @param array|bool $allowed_attributes The attributes KSES allows on the element.
+ * @return bool Whether KSES restricts the value of any attribute of the element.
+ */
+function _wp_kses_restricts_attribute_values( $allowed_attributes ): bool {
+	if ( ! is_array( $allowed_attributes ) ) {
+		return false;
+	}
+
+	foreach ( $allowed_attributes as $attribute_rules ) {
+		if ( ! is_array( $attribute_rules ) ) {
+			continue;
+		}
+		foreach ( array_keys( $attribute_rules ) as $rule ) {
+			if ( ! in_array( strtolower( (string) $rule ), array( 'required', 'valueless' ), true ) ) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Determines whether a directive binds an attribute whose value KSES restricts.
+ *
+ * This only applies to elements for which KSES restricts the value of at least one
+ * attribute. On those elements, a `data-wp-bind` directive is reported unless it binds
+ * an attribute which KSES allows there with any value. KSES calls this to keep such a
+ * directive out of content saved by an author who cannot post unfiltered HTML.
+ *
+ * @since 6.9.11
+ * @access private
+ * @ignore
+ *
+ * @param string     $directive_name     The directive attribute name, in lowercase.
+ * @param array|bool $allowed_attributes The attributes KSES allows on the element.
+ * @return bool Whether the directive binds an attribute whose value KSES restricts.
+ */
+function _wp_kses_directive_binds_value_restricted_attribute( string $directive_name, $allowed_attributes ): bool {
+	if ( ! str_starts_with( $directive_name, 'data-wp-bind--' ) ) {
+		return false;
+	}
+
+	if ( ! _wp_kses_restricts_attribute_values( $allowed_attributes ) ) {
+		return false;
+	}
+
+	/*
+	 * Both the whole remainder of the name and the part before a unique ID are checked, so
+	 * that the result does not depend on how the unique ID is parsed. A binding with a unique
+	 * ID is not applied at all, so removing one changes nothing.
+	 */
+	$bound_attribute  = substr( $directive_name, strlen( 'data-wp-bind--' ) );
+	$bound_attributes = array( $bound_attribute );
+	$unique_id_index  = strpos( $bound_attribute, '---' );
+	if ( false !== $unique_id_index ) {
+		$bound_attributes[] = substr( $bound_attribute, 0, $unique_id_index );
+	}
+
+	foreach ( $bound_attributes as $attribute_name ) {
+		if ( isset( $allowed_attributes[ $attribute_name ] ) ) {
+			$rules = $allowed_attributes[ $attribute_name ];
+		} elseif ( 1 === preg_match( '/^data-[a-z0-9_-]+$/', $attribute_name ) && isset( $allowed_attributes['data-*'] ) ) {
+			$rules = $allowed_attributes['data-*'];
+		} else {
+			return true;
+		}
+
+		if ( ! $rules || is_array( $rules ) ) {
+			return true;
+		}
 	}
 
 	return false;

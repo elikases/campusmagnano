@@ -33,7 +33,7 @@ get_current_screen()->add_help_tab(
 		'id'      => 'overview',
 		'title'   => __( 'Overview' ),
 		'content' => '<p>' . __( 'This screen lists all the existing users for your site. Each user has one of five defined roles as set by the site admin: Site Administrator, Editor, Author, Contributor, or Subscriber. Users with roles other than Administrator will see fewer options in the dashboard navigation when they are logged in, based on their role.' ) . '</p>' .
-		'<p>' . __( 'To add a new user for your site, click the Add New User button at the top of the screen or Add New User in the Users menu section.' ) . '</p>',
+		'<p>' . __( 'To add a new user for your site, click the Add User button at the top of the screen or Add User in the Users menu section.' ) . '</p>',
 	)
 );
 
@@ -122,7 +122,7 @@ switch ( $wp_list_table->current_action() ) {
 		$editable_roles = get_editable_roles();
 		$role           = $_REQUEST['new_role'];
 
-		// Mocking the `none` role so we are able to save it to the database
+		// Mock `none` as editable role.
 		$editable_roles['none'] = array(
 			'name' => __( '&mdash; No role for this site &mdash;' ),
 		);
@@ -155,13 +155,15 @@ switch ( $wp_list_table->current_action() ) {
 			// If the user doesn't already belong to the blog, bail.
 			if ( is_multisite() && ! is_user_member_of_blog( $id ) ) {
 				wp_die(
-					'<h1>' . __( 'Something went wrong.' ) . '</h1>' .
+					'<h1>' . __( 'An error occurred.' ) . '</h1>' .
 					'<p>' . __( 'One of the selected users is not a member of this site.' ) . '</p>',
 					403
 				);
 			}
 
 			$user = get_userdata( $id );
+
+			// If $role is empty, none will be set.
 			$user->set_role( $role );
 		}
 
@@ -369,7 +371,7 @@ switch ( $wp_list_table->current_action() ) {
 					/* translators: 1: User ID, 2: User login. */
 					__( 'ID #%1$s: %2$s <strong>The current user will not be deleted.</strong>' ),
 					$id,
-					$user->user_login
+					esc_html( $user->user_login )
 				);
 				echo "</li>\n";
 			} else {
@@ -382,7 +384,7 @@ switch ( $wp_list_table->current_action() ) {
 					/* translators: 1: User ID, 2: User login. */
 					__( 'ID #%1$s: %2$s' ),
 					$id,
-					$user->user_login
+					esc_html( $user->user_login )
 				);
 				echo "</li>\n";
 
@@ -536,7 +538,7 @@ switch ( $wp_list_table->current_action() ) {
 					/* translators: 1: User ID, 2: User login. */
 					__( 'ID #%1$s: %2$s <strong>Sorry, you are not allowed to remove this user.</strong>' ),
 					$id,
-					$user->user_login
+					esc_html( $user->user_login )
 				);
 				echo "</li>\n";
 			} else {
@@ -549,7 +551,7 @@ switch ( $wp_list_table->current_action() ) {
 					/* translators: 1: User ID, 2: User login. */
 					__( 'ID #%1$s: %2$s' ),
 					$id,
-					$user->user_login
+					esc_html( $user->user_login )
 				);
 				echo "</li>\n";
 
@@ -778,7 +780,7 @@ switch ( $wp_list_table->current_action() ) {
 			printf(
 				'<a href="%1$s" class="page-title-action">%2$s</a>',
 				esc_url( admin_url( 'user-new.php' ) ),
-				esc_html__( 'Add New User' )
+				esc_html__( 'Add User' )
 			);
 		} elseif ( is_multisite() && current_user_can( 'promote_users' ) ) {
 			printf(

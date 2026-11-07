@@ -690,18 +690,21 @@ function _wp_ajax_add_hierarchical_term() {
 		);
 	}
 
+	$parent_dropdown_args = array(
+		'taxonomy'         => $taxonomy->name,
+		'hide_empty'       => 0,
+		'name'             => 'new' . $taxonomy->name . '_parent',
+		'orderby'          => 'name',
+		'hierarchical'     => 1,
+		'show_option_none' => '&mdash; ' . $taxonomy->labels->parent_item . ' &mdash;',
+	);
+
+	/** This filter is documented in wp-admin/includes/meta-boxes.php */
+	$parent_dropdown_args = apply_filters( 'post_edit_category_parent_dropdown_args', $parent_dropdown_args );
+
 	ob_start();
 
-	wp_dropdown_categories(
-		array(
-			'taxonomy'         => $taxonomy->name,
-			'hide_empty'       => 0,
-			'name'             => 'new' . $taxonomy->name . '_parent',
-			'orderby'          => 'name',
-			'hierarchical'     => 1,
-			'show_option_none' => '&mdash; ' . $taxonomy->labels->parent_item . ' &mdash;',
-		)
-	);
+	wp_dropdown_categories( $parent_dropdown_args );
 
 	$sup = ob_get_clean();
 
@@ -1777,7 +1780,7 @@ function wp_ajax_add_user( $action ) {
 				'show-link' => sprintf(
 					/* translators: %s: The new user. */
 					__( 'User %s added' ),
-					'<a href="#user-' . $user_id . '">' . $user_object->user_login . '</a>'
+					'<a href="#user-' . $user_id . '">' . esc_html( $user_object->user_login ) . '</a>'
 				),
 				'role'      => $role,
 			),
@@ -2032,6 +2035,13 @@ function wp_ajax_menu_quick_search() {
 function wp_ajax_get_permalink() {
 	check_ajax_referer( 'getpermalink', 'getpermalinknonce' );
 	$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
+	if ( ! $post_id ) {
+		// Bypass call to get_preview_post_link() for unspecified post ID.
+		wp_die( '' );
+	}
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		wp_die( -1 );
+	}
 	wp_die( get_preview_post_link( $post_id ) );
 }
 
@@ -2043,8 +2053,15 @@ function wp_ajax_get_permalink() {
 function wp_ajax_sample_permalink() {
 	check_ajax_referer( 'samplepermalink', 'samplepermalinknonce' );
 	$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
-	$title   = isset( $_POST['new_title'] ) ? $_POST['new_title'] : '';
-	$slug    = isset( $_POST['new_slug'] ) ? $_POST['new_slug'] : null;
+	if ( ! $post_id ) {
+		// Bypass call to get_sample_permalink_html() for unspecified post ID.
+		wp_die( '' );
+	}
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		wp_die( -1 );
+	}
+	$title = isset( $_POST['new_title'] ) ? $_POST['new_title'] : '';
+	$slug  = isset( $_POST['new_slug'] ) ? $_POST['new_slug'] : null;
 	wp_die( get_sample_permalink_html( $post_id, $title, $slug ) );
 }
 
@@ -2114,7 +2131,7 @@ function wp_ajax_inline_save() {
 	if ( isset( $data['keep_private'] ) && 'private' === $data['keep_private'] ) {
 		$data['visibility']  = 'private';
 		$data['post_status'] = 'private';
-	} else {
+	} elseif ( isset( $data['_status'] ) ) {
 		$data['post_status'] = $data['_status'];
 	}
 
@@ -3556,8 +3573,9 @@ function wp_ajax_get_revision_diffs() {
 
 	$return = array();
 
+	// Increase the script timeout limit to allow ample time for diff UI setup.
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( 0 );
+		set_time_limit( 5 * MINUTE_IN_SECONDS );
 	}
 
 	foreach ( $_REQUEST['compare'] as $compare_key ) {
@@ -4577,6 +4595,12 @@ function wp_ajax_activate_plugin() {
 		wp_send_json_error( $status );
 	}
 
+	// A network-only plugin is activated for the entire network.
+	if ( is_multisite() && is_network_only_plugin( $status['plugin'] ) && ! current_user_can( 'manage_network_plugins' ) ) {
+		$status['errorMessage'] = __( 'Sorry, you are not allowed to activate this plugin.' );
+		wp_send_json_error( $status );
+	}
+
 	if ( is_plugin_active( $status['plugin'] ) ) {
 		$status['errorMessage'] = sprintf(
 			/* translators: %s: Plugin name. */
@@ -5353,7 +5377,7 @@ function wp_ajax_health_check_dotorg_communication() {
 	_doing_it_wrong(
 		'wp_ajax_health_check_dotorg_communication',
 		sprintf(
-		// translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it.
+			/* translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it. */
 			__( 'The Site Health check for %1$s has been replaced with %2$s.' ),
 			'wp_ajax_health_check_dotorg_communication',
 			'WP_REST_Site_Health_Controller::test_dotorg_communication'
@@ -5386,7 +5410,7 @@ function wp_ajax_health_check_background_updates() {
 	_doing_it_wrong(
 		'wp_ajax_health_check_background_updates',
 		sprintf(
-		// translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it.
+			/* translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it. */
 			__( 'The Site Health check for %1$s has been replaced with %2$s.' ),
 			'wp_ajax_health_check_background_updates',
 			'WP_REST_Site_Health_Controller::test_background_updates'
@@ -5419,7 +5443,7 @@ function wp_ajax_health_check_loopback_requests() {
 	_doing_it_wrong(
 		'wp_ajax_health_check_loopback_requests',
 		sprintf(
-		// translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it.
+			/* translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it. */
 			__( 'The Site Health check for %1$s has been replaced with %2$s.' ),
 			'wp_ajax_health_check_loopback_requests',
 			'WP_REST_Site_Health_Controller::test_loopback_requests'
@@ -5469,7 +5493,7 @@ function wp_ajax_health_check_get_sizes() {
 	_doing_it_wrong(
 		'wp_ajax_health_check_get_sizes',
 		sprintf(
-		// translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it.
+			/* translators: 1: The Site Health action that is no longer used by core. 2: The new function that replaces it. */
 			__( 'The Site Health check for %1$s has been replaced with %2$s.' ),
 			'wp_ajax_health_check_get_sizes',
 			'WP_REST_Site_Health_Controller::get_directory_sizes'
