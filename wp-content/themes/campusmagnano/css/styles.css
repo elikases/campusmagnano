@@ -756,7 +756,8 @@ body.mycode {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: url("https://campusmagnano.com/wp-content/uploads/2026/05/whatsapp.png");
+  background: url("https://campusmagnano.com/wp-content/uploads/2026/05/whatsapp.png") no-repeat;
+  background-size: contain;
   width: 64px;
   height: 64px;
   display: block;
