@@ -236,15 +236,28 @@
     }
 }
 
-/* Modo solo imagen: la placa entera es el enlace. */
+/* Modo solo imagen: la placa entera es el enlace.
+ *
+ * object-fit:contain y no cover: la imagen suele ser un flyer y hay que verlo
+ * completo. Con cover, cualquier diferencia entre la proporcion del flyer y la
+ * de la placa se come el titulo o el pie.
+ *
+ * La proporcion 4:5 es la que se le pide al flyer (1080x1350). Si uno viene con
+ * otra, contain lo muestra entero igual y deja franjas al costado en vez de
+ * recortarlo. max-height evita que una placa a pantalla completa mida 1900px.
+ */
 .placa--imagen {
     padding: 0;
+    aspect-ratio: 4 / 5;
+    max-height: 72vh;
+    background: $color-secondary;
+
     img {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         display: block;
     }
 }

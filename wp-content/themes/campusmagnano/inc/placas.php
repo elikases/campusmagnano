@@ -53,14 +53,16 @@ function cm_placa_labels( $labels ) {
 add_filter( 'post_type_labels_event', 'cm_placa_labels' );
 
 /**
- * Tamanio recortado para las placas.
+ * Tamanio de las imagenes de placa.
  *
- * Retrato 3:4 con recorte duro: la placa es una columna vertical, cualquier
- * otra proporcion deforma o deja franjas. Solo afecta a las imagenes que se
- * suban de aca en adelante.
+ * SIN recorte (tercer parametro en false). Una placa suele ser un flyer: un
+ * diseno compuesto donde el titulo esta arriba y las fechas abajo. Recortarlo
+ * para encajarlo en una proporcion fija le corta el titulo o el pie. La imagen
+ * se escala para entrar en 1080x1350 conservando su proporcion y despues el
+ * CSS la muestra entera con object-fit:contain.
  */
 function cm_placa_image_size() {
-	add_image_size( 'placa', 600, 800, true );
+	add_image_size( 'placa', 1080, 1350, false );
 }
 add_action( 'after_setup_theme', 'cm_placa_image_size' );
 
