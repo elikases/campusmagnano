@@ -1028,12 +1028,17 @@ body.mycode {
  *
  * La proporcion 4:5 es la que se le pide al flyer (1080x1350). Si uno viene con
  * otra, contain lo muestra entero igual y deja franjas al costado en vez de
- * recortarlo. max-height evita que una placa a pantalla completa mida 1900px.
+ * recortarlo.
+ *
+ * El tope va por ANCHO y no por alto. Topando el alto, una placa a pantalla
+ * completa queda ancha y baja, y el flyer flota entre dos bandas grises.
+ * Topando el ancho, la placa conserva su 4:5 y se centra en el slide.
  */
 .placa--imagen {
   padding: 0;
   aspect-ratio: 4/5;
-  max-height: 72vh;
+  max-width: 57.6vh;
+  margin: 0 auto;
   background: #f2f2f2;
 }
 .placa--imagen img {
