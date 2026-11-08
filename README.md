@@ -123,14 +123,19 @@ El bloque CSS se llama `.carrusel` y no `.slider` porque `_switch.scss` ya usa
 dev/build-theme-zip.sh
 ```
 
-Deja en el Escritorio un `campusmagnano-demo.zip` instalable desde **Apariencia
-→ Temas → Añadir nuevo → Subir tema**.
+Deja en el Escritorio un `placas-demo.zip` instalable desde **Apariencia →
+Temas → Añadir nuevo → Subir tema**.
 
-Por defecto lo arma con **otro nombre de carpeta** (`campusmagnano-demo`), para
-poder instalarlo al lado del theme que ya está en producción sin pisarlo: se
-activa, se muestra, y si algo no gusta se vuelve al anterior con un clic. El
-theme no cablea su propio nombre en ningún lado — las rutas salen todas de
-`get_template_directory()` — así que renombrar la carpeta no rompe nada.
+Por defecto lo arma como un theme aparte, **Placas Demo** (carpeta
+`placas-demo`), para poder instalarlo al lado del que está en producción sin
+pisarlo: se activa, se muestra, y si algo no gusta se vuelve al anterior con un
+clic. El nombre es deliberadamente distinto de «Campusmagnano»: en el listado de
+temas no tiene que haber dos tarjetas que empiecen igual, o se activa la
+equivocada. La descripción además aclara que es una propuesta.
+
+El theme no cablea su propio nombre en ningún lado — las 13 referencias a rutas
+salen de `get_template_directory()` — así que renombrar la carpeta no rompe
+nada.
 
 Para generar el que **reemplaza** al de producción:
 
