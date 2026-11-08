@@ -142,6 +142,24 @@ function cm_placa_guardar( $post_id ) {
 }
 add_action( 'save_post_event', 'cm_placa_guardar' );
 
+/**
+ * Mantiene la pagina del demo fuera de los buscadores.
+ *
+ * Es una propuesta para mostrarle a una persona, no contenido del sitio: si
+ * Google la indexa, compite con la portada por las mismas fechas y los mismos
+ * nombres de campus.
+ *
+ * wp_robots_no_robots() emite noindex, y ademas nofollow si el sitio entero
+ * esta marcado como no publico. El filtro corre dentro de wp_head().
+ */
+function cm_demo_noindex( $robots ) {
+	if ( is_page_template( 'page-demo.php' ) || is_page( 'demo' ) ) {
+		return wp_robots_no_robots( $robots );
+	}
+	return $robots;
+}
+add_filter( 'wp_robots', 'cm_demo_noindex' );
+
 /* -------------------------------------------------------------------------
  * Opciones del slider (metas de la pagina del demo)
  * ---------------------------------------------------------------------- */
