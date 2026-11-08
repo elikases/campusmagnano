@@ -117,6 +117,43 @@ Archivos de la feature: `page-demo.php`, `inc/placas.php`, `js/carrusel.js` y
 El bloque CSS se llama `.carrusel` y no `.slider` porque `_switch.scss` ya usa
 `.slider` para el switch de tema oscuro del header.
 
+## Subir el theme a un servidor
+
+```bash
+dev/build-theme-zip.sh
+```
+
+Deja en el Escritorio un `campusmagnano-demo.zip` instalable desde **Apariencia
+→ Temas → Añadir nuevo → Subir tema**.
+
+Por defecto lo arma con **otro nombre de carpeta** (`campusmagnano-demo`), para
+poder instalarlo al lado del theme que ya está en producción sin pisarlo: se
+activa, se muestra, y si algo no gusta se vuelve al anterior con un clic. El
+theme no cablea su propio nombre en ningún lado — las rutas salen todas de
+`get_template_directory()` — así que renombrar la carpeta no rompe nada.
+
+Para generar el que **reemplaza** al de producción:
+
+```bash
+dev/build-theme-zip.sh campusmagnano Campusmagnano
+```
+
+Ojo: reemplazar borra la carpeta del theme en el servidor. Conviene bajarla
+antes por FTP.
+
+El zip excluye `node_modules/` (8 MB de herramientas de compilación que no hacen
+nada en el servidor, y muchos hostings limitan la subida a 2 MB).
+
+Después de instalar y activar, en el servidor hace falta:
+
+1. **Ajustes → Enlaces permanentes → Guardar cambios** (el CPT `coachs` cambió
+   de slug).
+2. Crear una página con slug `demo` y plantilla **Demo Slider**.
+3. Subir los flyers en cada fecha y elegir el modo en "Mostrar en la placa".
+
+Los pasos 2 y 3 son obligatorios: la página vive en la base de datos y los
+flyers en `wp-content/uploads/`, ninguno de los dos viaja en el theme.
+
 ## Arreglado acá, pendiente de desplegar
 
 Estos bugs existen en el sitio en vivo y ya están corregidos en este repo. Se
