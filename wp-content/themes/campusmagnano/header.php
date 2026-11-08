@@ -52,9 +52,18 @@
     <header>
         <div class="wrap">
             <a href="/" class="logo2"></a>
+            <?php
+            // El switch de tema oscuro no se muestra en la portada ni en la
+            // pagina del demo. Sigue apareciendo en el resto de las plantillas
+            // (fechas, paginas sueltas, archivos, busqueda, 404).
+            $cm_ocultar_switch = is_front_page() || is_home()
+                || is_page_template( 'page-demo.php' ) || is_page( 'demo' );
+            if ( ! $cm_ocultar_switch ) :
+                ?>
             <label class="switch">
                 <input type="checkbox" id="themeSwitch">
                 <span class="slider round"></span>
             </label>
+            <?php endif; ?>
         </div>
     </header>

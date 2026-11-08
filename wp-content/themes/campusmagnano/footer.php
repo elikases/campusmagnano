@@ -37,17 +37,21 @@ Consultas e información: Franco Zecchin · +54 9 351 328-1636
     // Selecciona el interruptor
     const themeSwitch = document.getElementById('themeSwitch');
 
-    // Verifica el estado del switch cuando se carga la página
-    document.addEventListener('DOMContentLoaded', () => {
-        // Comprueba si el body tiene la clase 'dark' al cargar la página
-        if (document.body.classList.contains('dark')) {
-            themeSwitch.checked = true;
-        }
-    });
+    // En la pagina del demo el switch no se renderiza. Sin esta guarda,
+    // addEventListener sobre null tira un TypeError y ensucia la consola.
+    if (themeSwitch) {
+        // Verifica el estado del switch cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            // Comprueba si el body tiene la clase 'dark' al cargar la página
+            if (document.body.classList.contains('dark')) {
+                themeSwitch.checked = true;
+            }
+        });
 
-    // Agrega un evento de cambio al switch
-    themeSwitch.addEventListener('change', () => {
-        // Alterna la clase 'dark' en el body
-        document.body.classList.toggle('dark');
-    });
+        // Agrega un evento de cambio al switch
+        themeSwitch.addEventListener('change', () => {
+            // Alterna la clase 'dark' en el body
+            document.body.classList.toggle('dark');
+        });
+    }
 </script>
