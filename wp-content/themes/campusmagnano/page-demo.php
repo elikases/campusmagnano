@@ -36,7 +36,7 @@ $ver_dots    = $desplazable && $opciones['dots'];
 // el nombre de su placa en vez de "ir a la 3".
 $titulos = array();
 ?>
-<main>
+<main class="pagina-demo">
 <a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/+5493513281636?text=Hola!"></a>
 
 <section>

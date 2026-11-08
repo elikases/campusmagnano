@@ -38,7 +38,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--<link rel="profile" href="https://gmpg.org/xfn/11">-->
     <?php wp_head(); ?>
-    <link rel="stylesheet" href="<?php echo get_stylesheet_directory_uri(); ?>/css/styles.css">
+    <?php
+    // La hoja se versiona con la fecha de modificacion del archivo. Sin esto el
+    // navegador se queda con la copia cacheada aunque se suba un theme nuevo:
+    // se despliega un cambio y el visitante sigue viendo el diseno viejo.
+    $cm_css      = get_stylesheet_directory() . '/css/styles.css';
+    $cm_css_ver  = file_exists( $cm_css ) ? filemtime( $cm_css ) : _S_VERSION;
+    ?>
+    <link rel="stylesheet" href="<?php echo get_stylesheet_directory_uri(); ?>/css/styles.css?ver=<?php echo esc_attr( $cm_css_ver ); ?>">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel='shortcut icon' type='image/x-icon' href='<?php echo get_stylesheet_directory_uri(); ?>/images/i-magnano.svg' />
 </head>

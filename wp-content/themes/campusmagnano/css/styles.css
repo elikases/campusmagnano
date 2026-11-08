@@ -783,9 +783,13 @@ body.mycode {
 /* `main` es un grid item: _grid.scss pone body { display: grid }. Los grid items
  * nacen con min-width:auto, o sea que no bajan de su ancho min-content, y el
  * carrusel empujaba a `main` a 1040px en un telefono de 433 arrastrando al
- * header y al footer con el. Se limita a la pagina del demo para no tocar la
- * portada, que es un grid item igual. */
-.page-template-page-demo main {
+ * header y al footer con el.
+ *
+ * La clase va en el <main> de page-demo.php y no en una del body: body_class()
+ * solo escribe `page-template-page-demo` si la pagina tiene la plantilla
+ * asignada a mano, pero WordPress sirve page-demo.php igual por el slug. Una
+ * pagina creada sin asignar plantilla funcionaba y seguia desbordando. */
+.pagina-demo {
   min-width: 0;
 }
 
