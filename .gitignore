@@ -7,3 +7,6 @@ node_modules/
 wp-content/debug.log
 wp-content/upgrade/
 wp-content/uploads/
+
+# zips generados por dev/build-theme-zip.sh
+build/
