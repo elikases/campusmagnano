@@ -81,7 +81,7 @@ prácticamente no aporta estilos. El diseño real está todo en `css/styles.css`
 | `home.php` | La portada completa (fechas, acordeón, coachs, modalidades) |
 | `page-demo.php` | La página `/demo`: las placas en un carrusel (ver más abajo) |
 | `single-event.php` | El detalle de cada fecha, con el formulario de inscripción |
-| `header.php` / `footer.php` | Cabecera con logo y switch de tema oscuro; pie con redes |
+| `header.php` / `footer.php` | Cabecera con logo; pie con redes. El switch de tema oscuro **no** se muestra en la portada ni en `/demo` |
 | `functions.php` | Registra los 4 custom post types y sus meta boxes |
 
 El resto (`index.php`, `single.php`, `page.php`, `archive.php`, `search.php`,
@@ -117,6 +117,22 @@ Archivos de la feature: `page-demo.php`, `inc/placas.php`, `js/carrusel.js` y
 El bloque CSS se llama `.carrusel` y no `.slider` porque `_switch.scss` ya usa
 `.slider` para el switch de tema oscuro del header.
 
+La página se sirve con `noindex, follow`: es una propuesta, y si Google la
+indexa compite con la portada por las mismas búsquedas.
+
+Dos detalles que no son obvios al leer el código:
+
+- **Las comprobaciones de la página van siempre por dos vías**,
+  `is_page_template( 'page-demo.php' ) || is_page( 'demo' )`. `body_class()` y
+  `is_page_template()` sólo reconocen la plantilla si la página tiene
+  `_wp_page_template` asignado a mano desde el desplegable, pero WordPress la
+  sirve igual por el slug. Una página creada sin elegir plantilla funciona, y
+  cualquier cosa colgada de la clase del `body` se cae en silencio. Por eso el
+  arreglo del scroll mobile cuelga de `<main class="pagina-demo">`.
+- **`css/styles.css` se versiona con `filemtime()`** en `header.php`. La hoja
+  está cableada a mano ahí (no encolada), y sin versión el navegador se queda
+  con la copia vieja después de cada despliegue.
+
 ## Subir el theme a un servidor
 
 ```bash
@@ -124,7 +140,13 @@ dev/build-theme-zip.sh
 ```
 
 Deja en el Escritorio un `placas-demo.zip` instalable desde **Apariencia →
-Temas → Añadir nuevo → Subir tema**.
+Temas → Añadir nuevo → Subir tema**. Con `DEST=/ruta/salida.zip` se cambia el
+destino.
+
+Nota: si el script corre desde esta sesión de Claude Code, el zip **no llega al
+Escritorio** — las escrituras fuera del repo quedan en un sandbox y el archivo
+nunca toca el disco, aunque el propio comando después lo liste sin error. En ese
+caso conviene `DEST=build/placas-demo.zip` y copiarlo a mano.
 
 Por defecto lo arma como un theme aparte, **Placas Demo** (carpeta
 `placas-demo`), para poder instalarlo al lado del que está en producción sin
@@ -153,7 +175,10 @@ Después de instalar y activar, en el servidor hace falta:
 
 1. **Ajustes → Enlaces permanentes → Guardar cambios** (el CPT `coachs` cambió
    de slug).
-2. Crear una página con slug `demo` y plantilla **Demo Slider**.
+2. Crear una página con slug `demo`. Asignarle la plantilla **Demo Slider** en
+   "Atributos de página" es opcional: WordPress sirve `page-demo.php` por el
+   slug igual, y la caja "Opciones del slider" también se activa por el slug (al
+   crear la página hay que guardarla una vez para que el slug exista).
 3. Subir los flyers en cada fecha y elegir el modo en "Mostrar en la placa".
 
 Los pasos 2 y 3 son obligatorios: la página vive en la base de datos y los

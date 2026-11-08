@@ -1,6 +1,8 @@
 # Spec — Placas con imagen propia y slider (página `/demo`)
 
-Estado: **implementado**. Ver seccion 13 para lo que se desvio de la propuesta.
+Estado: **implementado y en produccion**. La seccion 13 lista lo que se
+desvio de la propuesta al escribir el codigo; la 14, lo que cambio despues de
+mostrarlo en pantalla y en un telefono real. Donde las dos difieren, manda la 14.
 Fecha: 2026-11-07.
 
 ---
@@ -110,6 +112,9 @@ La placa es una columna vertical, así que el recorte 3:4 es el que no deforma.
 Se le indica al cliente subir **720×960 px o más**. El recorte sólo afecta a las
 imágenes que se suban de ahí en adelante; para las ya existentes en la mediateca
 hace falta regenerar miniaturas (no es necesario: no hay ninguna en uso).
+
+> **Cambió.** El recorte duro decapitaba los flyers. Hoy es
+> `add_image_size( 'placa', 1080, 1350, false )`. Ver 14.1.
 
 ### 4.3 Modo de visualización
 
@@ -322,6 +327,7 @@ demo se puede ajustar sin riesgo de mover la portada.
 - Modo `imagen`: la `<img>` va `width:100%; height:100%; object-fit:cover;
   display:block`, y la placa fija `aspect-ratio: 3/4` para que todas midan igual
   aunque el cliente suba imágenes de proporciones distintas.
+  **Cambió a `contain` y `4/5`** cuando se probó con flyers reales: ver 14.1.
 - Modo `texto` con imagen de fondo: se superpone un degradado
   (`::after` o `box-shadow: inset`) para que el texto naranja siga legible sobre
   una foto cualquiera. **Sin esto el texto se pierde** sobre imágenes claras: la
@@ -404,7 +410,8 @@ Recordatorio del flujo: **se edita `sass/`, no `css/styles.css`**.
 - **Las 7 fechas en borrador** no aparecen, igual que hoy. Si el cliente espera
   verlas en el slider, hay que publicarlas.
 - **Peso de las imágenes.** Si el cliente sube fotos de 4 MB, el slider carga 5.
-  Mitigado con `loading="lazy"` y el tamaño `placa` recortado, pero conviene
+  Mitigado con `loading="lazy"` y el tamaño `placa` (que reescala a 1080 px de
+  ancho, aunque ya no recorta), pero conviene
   decirle el tamaño recomendado. No se incluye compresión automática.
 - **Fuera de alcance:** video de fondo, enlaces distintos del permalink de la
   fecha, reordenar placas con drag & drop (el orden es el de WP_Query: fecha de
@@ -434,7 +441,8 @@ escribir el código:
    pantalla ancha mide ~700px de alto. Se usa `min-height` y, en modo imagen, un
    `<img>` en `position:absolute; inset:0; object-fit:cover`: flexbox ya iguala
    la altura de todos los slides, así que las placas quedan parejas sin fijar
-   proporción.
+   proporción. **Esto se revirtió en parte**: con flyers reales hizo falta
+   `aspect-ratio: 4/5` y `object-fit: contain`. Ver 14.1.
 
 4. **`goTo()` distingue avanzar de saltar.** Con `loop` activo, un salto directo
    a una posición fuera de rango daba la vuelta en vez de topar. Ahora sólo los
@@ -457,9 +465,9 @@ escribir el código:
   línea nueva que menciona `.slider` es un comentario.
 - La portada sigue devolviendo 200 con sus 5 `.fecha` y sin cargar
   `carrusel.js`.
-- Los tres caminos de la placa renderizan bien: modo imagen con `<img>` 600×800
-  (`loading=lazy`, `alt`, `srcset`), modo texto con `--placa-img`, y modo imagen
-  **sin** imagen cayendo a texto.
+- Los tres caminos de la placa renderizan bien: modo imagen con `<img>` del
+  tamaño `placa` (`loading=lazy`, `alt`, `srcset`), modo texto con `--placa-img`,
+  y modo imagen **sin** imagen cayendo a texto.
 - En las 5 placas, el enlace de la imagen o del overlay y el del botón
   "Participar" apuntan al mismo `/fecha/<slug>/`.
 - Las 6 opciones del admin cambian el HTML servido, y los valores fuera de rango
@@ -470,7 +478,108 @@ escribir el código:
 - `dev/seed-content.php` sigue siendo idempotente.
 - `wp-content/debug.log` sin errores.
 
-**No verificado:** el aspecto visual. La extensión de Chrome no está conectada
-en esta sesión, así que el render no se pudo mirar. Lo que falta revisar a ojo
-es el velo de contraste sobre una foto real y la posición de las flechas en
-mobile.
+**No verificado en ese momento:** el aspecto visual. La extensión de Chrome no
+estaba conectada, así que el render no se pudo mirar. Eso se resolvió después,
+mirándolo en pantalla y midiendo en un teléfono Android por `adb` + CDP, y de
+ahí salieron los cambios de la sección 14.
+
+---
+
+## 14. Cambios posteriores: de la pantalla al teléfono
+
+Todo lo de abajo salió de mirar el demo renderizado y de medirlo en un Android
+real (`adb forward` + Chrome DevTools Protocol). Ninguno estaba en la spec
+original porque ninguno se ve leyendo el código.
+
+### 14.1 El recorte decapitaba los flyers
+
+`add_image_size( 'placa', 600, 800, true )` recortaba duro a 3:4. Un flyer de
+768×1376 que subió el cliente perdió el **26% de su altura**: el título quedó
+cortado al medio y desapareció todo el bloque inferior, "INSCRIPCIONES
+ABIERTAS" incluido. Un flyer no es una foto: no tiene margen de sobra para
+sacrificar, el contenido llega hasta el borde.
+
+```php
+add_image_size( 'placa', 1080, 1350, false );  // sin recorte
+```
+
+Con `false` la imagen se reescala para **caber** en la caja sin cortar nada, y
+el CSS pasa a `object-fit: contain`. Las imágenes ya subidas se regeneran:
+
+```bash
+docker compose exec -T wpcli wp media regenerate --image_size=placa
+```
+
+`contain` trae su propio problema: si la placa no tiene la proporción del
+flyer, sobran bandas. Se fija `aspect-ratio: 4 / 5`, cerca del vertical típico
+de un flyer de redes.
+
+### 14.2 Topar por ancho, no por alto
+
+Con una placa por vista el primer intento fue `max-height: 72vh`. Mal: limitar
+el alto de un elemento con `aspect-ratio` lo deja **ancho y bajo**, con el
+flyer flotando entre dos bandas grises. Hay que limitar el ancho y dejar que la
+proporción calcule el alto:
+
+```scss
+max-width: calc(72vh * 4 / 5);
+margin: 0 auto;
+```
+
+### 14.3 El scroll horizontal en mobile
+
+En un teléfono de 433 px el documento medía **1040 px**: la página entera se
+iba al costado, header y footer incluidos. La causa no estaba en el carrusel
+sino en `_grid.scss`, que pone `body { display: grid }`. **Un grid item nace
+con `min-width: auto`**, o sea que se niega a bajar de su ancho `min-content`;
+el carrusel empujaba a `main` a 1040 px y arrastraba a sus hermanos.
+
+```scss
+.pagina-demo { min-width: 0; }
+```
+
+El primer arreglo colgaba de `.page-template-page-demo main`, y **falló en
+producción**: el cliente creó la página sin asignarle la plantilla desde el
+desplegable, y `body_class()` sólo escribe `page-template-{slug}` cuando
+`_wp_page_template` está seteado a mano. WordPress igual sirve `page-demo.php`
+por el slug, así que la página andaba y seguía desbordando. La clase se movió
+al `<main>` de la plantilla, que no depende de cómo se creó la página. El mismo
+razonamiento vale para el `is_page_template( 'page-demo.php' ) || is_page( 'demo' )`
+de `functions.php` y `header.php`: siempre las dos vías.
+
+### 14.4 Versionar el CSS
+
+`header.php` cablea `<link href=".../css/styles.css">` a mano en vez de
+encolarlo, y lo servía sin versión. Resultado: se despliega un arreglo y el
+visitante sigue viendo el diseño viejo desde la caché. Durante el diagnóstico
+en el teléfono costó media hora por esto mismo — las mediciones no reflejaban
+el CSS que ya estaba subido.
+
+```php
+$cm_css_ver = file_exists( $cm_css ) ? filemtime( $cm_css ) : _S_VERSION;
+```
+
+### 14.5 `noindex` en `/demo`
+
+La página es una propuesta para el cliente, no contenido público: indexada
+competiría con la portada por las mismas búsquedas. Se filtra `wp_robots` con
+`wp_robots_no_robots()` (`noindex, follow`), chequeando plantilla **y** slug
+por lo de 14.3.
+
+### 14.6 Fuera el switch de tema oscuro
+
+Se quitó de la portada y del demo (`header.php`, condición `$cm_ocultar_switch`).
+Sigue apareciendo en el resto de las plantillas — fechas, páginas sueltas,
+archivos, búsqueda, 404 —, lo que deja la navegación inconsistente: el control
+aparece y desaparece según la página. Sacarlo de todo el sitio es borrar
+`is_front_page() || is_home() ||` de esa condición.
+
+El script inline del footer quedó envuelto en `if (themeSwitch)`: sin eso
+`addEventListener` sobre `null` tiraba un TypeError en las páginas donde el
+switch ya no se renderiza.
+
+### 14.7 El theme de demo es un theme aparte
+
+Se empaqueta como **Placas Demo** (carpeta `placas-demo`) con
+`dev/build-theme-zip.sh`, para instalarlo al lado del de producción sin pisarlo
+y poder volver atrás con un clic. Ver el README.
