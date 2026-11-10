@@ -87,6 +87,43 @@
 }
 
 /* -------------------------------------------------------------------------
+ * Grilla: las mismas placas, sin slider
+ *
+ * La opcion "Mostrar las placas: en grilla" de la pagina del demo. Contenedor
+ * propio en vez de reutilizar .campus de la portada por lo mismo que .carrusel
+ * no reutiliza .fecha: aquel bloque cablea margenes negativos y fondos por
+ * nth-child pensados para una fila fija de 5.
+ * ---------------------------------------------------------------------- */
+
+.placas-grilla {
+    display: grid;
+    list-style: none;
+    margin: 0 0 30px;
+    padding: 0;
+    max-width: 100%;
+
+    /* --columnas-desktop llega inline desde la plantilla: la cantidad de fechas
+     * publicadas, topada en 5. Igual que en el carrusel, una custom property
+     * inline no se puede sobreescribir desde una media query, asi que la que
+     * consume el layout es --columnas, derivada de ella. */
+    --columnas: var(--columnas-desktop, 5);
+    grid-template-columns: repeat(var(--columnas), minmax(0, 1fr));
+
+    @include tablet {
+        --columnas: 2;
+    }
+    @include mobile {
+        --columnas: 1;
+    }
+}
+
+/* La placa es flex:1 y se estira sola dentro del item. */
+.placas-grilla__item {
+    display: flex;
+    min-width: 0;
+}
+
+/* -------------------------------------------------------------------------
  * La placa
  * ---------------------------------------------------------------------- */
 
@@ -120,12 +157,17 @@
 }
 
 /* Sin imagen propia la placa conserva el aspecto de la portada: alterna las
- * ilustraciones del theme segun la posicion. */
-.carrusel__slide:nth-child(even) .placa:not(.placa--con-imagen) {
+ * ilustraciones del theme segun la posicion.
+ *
+ * El :is() cubre los dos contenedores posibles de una placa, el slide del
+ * carrusel y el item de la grilla, sin repetir las tres reglas. Los dos
+ * argumentos son clases, asi que la especificidad no cambia respecto de
+ * escribir el selector a mano. */
+:is(.carrusel__slide, .placas-grilla__item):nth-child(even) .placa:not(.placa--con-imagen) {
     background: #fff $girl 80px top;
     background-size: 70%;
 }
-.carrusel__slide:nth-child(odd) .placa:not(.placa--con-imagen) {
+:is(.carrusel__slide, .placas-grilla__item):nth-child(odd) .placa:not(.placa--con-imagen) {
     background: $color-secondary $boy right -100px;
     background-size: 100%;
     align-items: end;
@@ -133,7 +175,7 @@
         align-items: center;
     }
 }
-.carrusel__slide:nth-child(3) .placa:not(.placa--con-imagen) {
+:is(.carrusel__slide, .placas-grilla__item):nth-child(3) .placa:not(.placa--con-imagen) {
     background: $color-secondary $girl right bottom;
     background-size: 200%;
 }

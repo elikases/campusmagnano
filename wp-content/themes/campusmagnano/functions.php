@@ -152,7 +152,11 @@ function campusmagnano_scripts() {
     // Se chequean las dos vias: is_page_template() solo es true si la pagina
     // tiene la plantilla asignada a mano, pero la jerarquia de WordPress sirve
     // page-demo.php a la pagina con slug `demo` igual, sin asignarla.
-    if ( is_page_template( 'page-demo.php' ) || is_page( 'demo' ) ) {
+    //
+    // En modo grilla no se encola: no hay carrusel en el markup, asi que el
+    // script no tendria nada que inicializar.
+    if ( ( is_page_template( 'page-demo.php' ) || is_page( 'demo' ) )
+        && 'slider' === cm_slider_vista( get_queried_object_id() ) ) {
         wp_enqueue_script( 'campusmagnano-carrusel', get_template_directory_uri() . '/js/carrusel.js', array(), _S_VERSION, true );
     }
 }

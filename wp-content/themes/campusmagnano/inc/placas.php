@@ -197,6 +197,21 @@ function cm_slider_opciones( $post_id ) {
 	return $opciones;
 }
 
+/**
+ * Vista de las placas de una pagina: 'slider' o 'grilla'.
+ *
+ * Aparte de cm_slider_opciones() porque ahi todos los valores se castean a
+ * int: esta es una cadena, y mezclarla obligaria a tratar una clave distinto
+ * que las demas dentro del mismo foreach.
+ *
+ * El default es 'slider': es lo que ya estaba publicado cuando se agrego la
+ * opcion, asi que una pagina sin la meta guardada se sigue viendo igual.
+ */
+function cm_slider_vista( $post_id ) {
+	$vista = get_post_meta( $post_id, '_slider_vista', true );
+	return 'grilla' === $vista ? 'grilla' : 'slider';
+}
+
 function cm_slider_meta_box() {
 	add_meta_box(
 		'slider_opciones',
@@ -216,14 +231,29 @@ function cm_slider_meta_box_html( $post ) {
 	}
 
 	wp_nonce_field( 'cm_slider_guardar', 'cm_slider_nonce' );
-	$o = cm_slider_opciones( $post->ID );
+	$o     = cm_slider_opciones( $post->ID );
+	$vista = cm_slider_vista( $post->ID );
 	?>
 	<table class="form-table" role="presentation">
+		<tr>
+			<th scope="row">Mostrar las placas</th>
+			<td>
+				<label style="display:block; margin-bottom:8px">
+					<input type="radio" name="slider_vista" value="slider" <?php checked( 'slider', $vista ); ?> />
+					En slider: se pasan de a una, con flechas y puntos
+				</label>
+				<label style="display:block">
+					<input type="radio" name="slider_vista" value="grilla" <?php checked( 'grilla', $vista ); ?> />
+					En grilla: todas a la vez, como en la portada
+				</label>
+				<p class="description">En grilla no hay desplazamiento ni controles: las opciones de abajo quedan sin efecto.</p>
+			</td>
+		</tr>
 		<tr>
 			<th scope="row"><label for="slider_visibles">Placas por vista</label></th>
 			<td>
 				<input type="number" id="slider_visibles" name="slider_visibles" min="1" max="5" step="1" value="<?php echo esc_attr( $o['visibles'] ); ?>" />
-				<p class="description">Cuantas placas se ven a la vez en pantalla grande. En tablet se muestran 2 y en celular 1, siempre.</p>
+				<p class="description">Solo en modo slider. Cuantas placas se ven a la vez en pantalla grande; en tablet se muestran 2 y en celular 1, siempre.</p>
 			</td>
 		</tr>
 		<tr>
@@ -260,6 +290,9 @@ function cm_slider_guardar( $post_id ) {
 	if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 		return;
 	}
+
+	$vista = isset( $_POST['slider_vista'] ) ? sanitize_key( $_POST['slider_vista'] ) : 'slider';
+	update_post_meta( $post_id, '_slider_vista', 'grilla' === $vista ? 'grilla' : 'slider' );
 
 	$visibles  = isset( $_POST['slider_visibles'] ) ? (int) $_POST['slider_visibles'] : 3;
 	$intervalo = isset( $_POST['slider_intervalo'] ) ? (int) $_POST['slider_intervalo'] : 5;

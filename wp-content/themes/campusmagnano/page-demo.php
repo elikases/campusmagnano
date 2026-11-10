@@ -4,19 +4,25 @@ Template Name: Demo Slider
 */
 
 /**
- * Demo de las placas administrables en formato slider.
+ * Demo de las placas administrables, en slider o en grilla.
  *
  * Es una copia paralela de la seccion de fechas de home.php: la portada no se
  * toca. Las secciones de acordeon, coachs y modalidades no se replican aca
  * porque el demo es sobre las placas y duplicarlas solo agrega superficie que
  * mantener sincronizada.
  *
+ * La vista la elige el cliente desde la pagina (ver cm_slider_vista): en
+ * grilla las placas se muestran todas a la vez, sin desplazamiento ni
+ * controles, para poder comparar la propuesta contra la portada.
+ *
  * @package Campusmagnano
  */
 
 get_header();
 
-$opciones = cm_slider_opciones( get_the_ID() );
+$pagina_id = get_the_ID();
+$opciones  = cm_slider_opciones( $pagina_id );
+$es_grilla = 'grilla' === cm_slider_vista( $pagina_id );
 
 $fechas = new WP_Query(
 	array(
@@ -27,10 +33,16 @@ $fechas = new WP_Query(
 
 $total = $fechas->found_posts;
 
-// Sin placas suficientes para desplazarse, los controles no tienen sentido.
-$desplazable = $total > $opciones['visibles'];
+// En grilla entran todas las placas en pantalla: no hay desplazamiento que
+// controlar. Y en slider, sin placas suficientes para desplazarse, los
+// controles tampoco tienen sentido.
+$desplazable = ! $es_grilla && $total > $opciones['visibles'];
 $ver_flechas = $desplazable && $opciones['flechas'];
 $ver_dots    = $desplazable && $opciones['dots'];
+
+// Columnas de la grilla en desktop: todas las placas en una fila, hasta 5.
+// Mas de 5 en una fila las deja demasiado angostas para leerlas.
+$columnas = max( 1, min( 5, $total ) );
 
 // Los titulos se juntan en la primera pasada para poder etiquetar los dots con
 // el nombre de su placa en vez de "ir a la 3".
@@ -45,6 +57,24 @@ $titulos = array();
 	<?php if ( ! $total ) : ?>
 
 		<p class="carrusel__vacio">Todavia no hay fechas publicadas.</p>
+
+	<?php elseif ( $es_grilla ) : ?>
+
+	<ul class="placas-grilla" style="--columnas-desktop:<?php echo esc_attr( $columnas ); ?>">
+
+		<?php
+		while ( $fechas->have_posts() ) :
+			$fechas->the_post();
+			?>
+			<li class="placas-grilla__item">
+				<?php get_template_part( 'template-parts/placa' ); ?>
+			</li>
+			<?php
+		endwhile;
+		wp_reset_postdata();
+		?>
+
+	</ul>
 
 	<?php else : ?>
 
@@ -65,81 +95,11 @@ $titulos = array();
 				while ( $fechas->have_posts() ) :
 					$fechas->the_post();
 
-					$id        = get_the_ID();
-					$titulo    = get_the_title();
-					$titulos[] = $titulo;
-
-					$permalink = get_permalink();
-					$modo      = cm_placa_modo( $id );
-					$imagen_id = get_post_thumbnail_id( $id );
-
-					$clases = array( 'placa', 'placa--' . $modo );
-					if ( $imagen_id ) {
-						$clases[] = 'placa--con-imagen';
-					}
+					$titulos[] = get_the_title();
 					?>
-
 					<li class="carrusel__slide">
-
-						<?php if ( 'imagen' === $modo ) : ?>
-
-							<a class="<?php echo esc_attr( implode( ' ', $clases ) ); ?>" href="<?php echo esc_url( $permalink ); ?>">
-								<?php
-								echo wp_get_attachment_image(
-									$imagen_id,
-									'placa',
-									false,
-									array(
-										'loading' => 'lazy',
-										'alt'     => $titulo,
-									)
-								);
-								?>
-							</a>
-
-						<?php else : ?>
-
-							<div class="<?php echo esc_attr( implode( ' ', $clases ) ); ?>"
-								<?php if ( $imagen_id ) : ?>
-									style="--placa-img:url('<?php echo esc_url( wp_get_attachment_image_url( $imagen_id, 'placa' ) ); ?>')"
-								<?php endif; ?>
-								>
-								<?php
-								// Link que cubre la placa entera. Va como hermano del
-								// boton y no envolviendolo: un <a> dentro de otro <a>
-								// es HTML invalido. aria-hidden + tabindex -1 para no
-								// duplicar el enlace en un lector de pantalla: el
-								// nombre accesible lo da el boton "Participar".
-								?>
-								<a class="placa__cover" href="<?php echo esc_url( $permalink ); ?>" tabindex="-1" aria-hidden="true"></a>
-
-								<p class="placa__titulo"><?php echo esc_html( $titulo ); ?></p>
-
-								<?php
-								$club     = get_post_meta( $id, 'event_club', true );
-								$location = get_post_meta( $id, 'event_location', true );
-								$date     = get_post_meta( $id, 'event_date', true );
-								?>
-
-								<?php if ( ! empty( $club ) ) : ?>
-									<p class="placa__titulo"><?php echo esc_html( $club ); ?></p>
-								<?php endif; ?>
-
-								<?php if ( ! empty( $location ) ) : ?>
-									<p class="placa__city"><?php echo esc_html( $location ); ?></p>
-								<?php endif; ?>
-
-								<?php if ( ! empty( $date ) ) : ?>
-									<p class="placa__date"><?php echo esc_html( $date ); ?></p>
-								<?php endif; ?>
-
-								<a class="btn placa__btn" href="<?php echo esc_url( $permalink ); ?>">Participar</a>
-							</div>
-
-						<?php endif; ?>
-
+						<?php get_template_part( 'template-parts/placa' ); ?>
 					</li>
-
 					<?php
 				endwhile;
 				wp_reset_postdata();
