@@ -143,7 +143,33 @@ function cm_placa_guardar( $post_id ) {
 add_action( 'save_post_event', 'cm_placa_guardar' );
 
 /**
- * Mantiene la pagina del demo fuera de los buscadores.
+ * Indica si la pagina que se esta sirviendo es uno de los dos demos.
+ *
+ * Las dos vias por cada demo: is_page_template() solo es true si la plantilla
+ * esta asignada a mano, pero la jerarquia de WordPress sirve page-demo.php y
+ * page-demo2.php a las paginas con esos slugs igual, sin asignarla.
+ *
+ * Conditional tags: solo sirve dentro del loop principal, no en el admin.
+ */
+function cm_es_pagina_demo() {
+	return is_page_template( 'page-demo.php' ) || is_page( 'demo' )
+		|| is_page_template( 'page-demo2.php' ) || is_page( 'demo2' );
+}
+
+/**
+ * Indica si un post es la pagina del demo 2.
+ *
+ * Version para el admin, donde los conditional tags no estan disponibles.
+ */
+function cm_es_pagina_demo2( $post ) {
+	if ( ! $post || 'page' !== $post->post_type ) {
+		return false;
+	}
+	return 'page-demo2.php' === get_page_template_slug( $post->ID ) || 'demo2' === $post->post_name;
+}
+
+/**
+ * Mantiene las paginas de los demos fuera de los buscadores.
  *
  * Es una propuesta para mostrarle a una persona, no contenido del sitio: si
  * Google la indexa, compite con la portada por las mismas fechas y los mismos
@@ -153,7 +179,7 @@ add_action( 'save_post_event', 'cm_placa_guardar' );
  * esta marcado como no publico. El filtro corre dentro de wp_head().
  */
 function cm_demo_noindex( $robots ) {
-	if ( is_page_template( 'page-demo.php' ) || is_page( 'demo' ) ) {
+	if ( cm_es_pagina_demo() ) {
 		return wp_robots_no_robots( $robots );
 	}
 	return $robots;
@@ -212,7 +238,13 @@ function cm_slider_vista( $post_id ) {
 	return 'grilla' === $vista ? 'grilla' : 'slider';
 }
 
-function cm_slider_meta_box() {
+function cm_slider_meta_box( $post_type, $post ) {
+	// El demo 2 muestra las placas como la portada y no tiene slider: la caja
+	// no aplica, ni siquiera para explicar como activarla.
+	if ( cm_es_pagina_demo2( $post ) ) {
+		return;
+	}
+
 	add_meta_box(
 		'slider_opciones',
 		'Opciones del slider',
@@ -222,7 +254,7 @@ function cm_slider_meta_box() {
 		'default'
 	);
 }
-add_action( 'add_meta_boxes', 'cm_slider_meta_box' );
+add_action( 'add_meta_boxes', 'cm_slider_meta_box', 10, 2 );
 
 function cm_slider_meta_box_html( $post ) {
 	if ( ! cm_es_pagina_slider( $post ) ) {

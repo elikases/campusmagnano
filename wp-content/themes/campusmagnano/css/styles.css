@@ -1263,3 +1263,163 @@ body.dark .carrusel__dot[aria-selected=true] {
     scroll-behavior: auto;
   }
 }
+/* -------------------------------------------------------------------------
+ * Demo 2: las placas con la disposicion de la portada
+ *
+ * A diferencia de .carrusel, este demo SI reutiliza .campus y .fecha de
+ * _campus.scss: el pedido es justamente que se vea igual que la portada, con
+ * el mismo reacomodo por flex-wrap (en desktop entran 3 y bajan 2) y los
+ * mismos cortes en mobile. Repetir el layout en un bloque propio garantizaria
+ * que se despegue del original en el primer ajuste.
+ *
+ * Lo unico que se agrega es la imagen de cada placa, que no existe en la
+ * portada. Va como capa de fondo del .fecha, asi que la caja no cambia de
+ * tamanio: la alto lo sigue dando el texto.
+ *
+ * Este parcial se importa DESPUES de campus.scss. Los selectores de abajo
+ * tienen la misma especificidad que los de alla (`.campus .fecha.fecha--con-imagen`
+ * y `.campus .fecha:nth-child(odd)` son los dos 0,3,0), asi que ganan por
+ * orden de aparicion. Subirles la especificidad con !important o con un id
+ * seria mas fragil de desarmar despues.
+ * ---------------------------------------------------------------------- */
+/* `main` es un grid item y nace con min-width:auto. Lo mismo que .pagina-demo:
+ * sin esto el contenido puede empujar el ancho de main y arrastrar al header y
+ * al footer con el. */
+.pagina-demo2 {
+  min-width: 0;
+  /* La portada resuelve el caso de una sola fecha con un <style> inline en
+   * home.php. Aca vive en el CSS, acotado a esta pagina para no pisar nada. */
+}
+.pagina-demo2 .unafecha {
+  align-items: center;
+}
+
+/* -------------------------------------------------------------------------
+ * La placa con imagen propia
+ * ---------------------------------------------------------------------- */
+.campus .fecha.fecha--con-imagen {
+  /* Tres capas: el velo de contraste, la imagen y el color de base por si la
+   * imagen tarda o falla. `cover` recorta por el lado que sobra y centra, asi
+   * que una foto horizontal entra sin deformarse en una caja cuyo alto lo
+   * marca el texto.
+   *
+   * El velo va como capa de fondo y no como ::after porque _campus.scss ya
+   * usa ::after y ::before para las cejas de 20px de los costados.
+   *
+   * Es mas parejo que el del carrusel (que se apaga del todo arriba): alla el
+   * texto va pegado al borde de abajo, aca ocupa casi toda la caja, asi que
+   * el velo necesita un piso en la parte alta o el titulo blanco se pierde
+   * sobre una cancha clara. Si una foto queda demasiado apagada, estos tres
+   * valores son el unico lugar donde tocar. */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.45) 60%, rgba(0, 0, 0, 0.2)), var(--fecha-img) center/cover no-repeat, #f2f2f2;
+  /* Las cejas son dos franjas claras pegadas a los bordes, dibujadas sobre el
+   * fondo: sobre una ilustracion plana se leen como un pliegue, sobre una
+   * foto son un tajo blanco. Las placas nth-child(odd) de la portada ya las
+   * esconden por lo mismo. */
+}
+.campus .fecha.fecha--con-imagen::after, .campus .fecha.fecha--con-imagen::before {
+  display: none;
+}
+.campus .fecha.fecha--con-imagen {
+  /* Sobre una foto el degradado naranja no se lee: texto blanco, igual que en
+   * las placas del carrusel. */
+}
+.campus .fecha.fecha--con-imagen .titulo,
+.campus .fecha.fecha--con-imagen .city {
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+.campus .fecha.fecha--con-imagen .date {
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* -------------------------------------------------------------------------
+ * Clic en toda la placa
+ * ---------------------------------------------------------------------- */
+/* Mismo comportamiento que en /demo: el clic en cualquier punto lleva al
+ * formulario de esa fecha. Es invisible, asi que la pagina sigue viendose como
+ * la portada. */
+.fecha__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+}
+
+/* El boton queda por encima del cover para conservar su :hover. Los dos
+ * apuntan al mismo lugar, asi que el clic hace lo mismo caiga donde caiga. */
+.pagina-demo2 .campus .btn {
+  position: relative;
+  z-index: 4;
+}
+
+/* -------------------------------------------------------------------------
+ * "Solo la imagen": el texto ya viene dibujado en la placa
+ * ---------------------------------------------------------------------- */
+/* Aca el texto SI se saca del layout, al reves que en la primera version de
+ * esto. El motivo es que estas placas dejan de medir lo que mide su texto:
+ * toman el ancho de la grilla y el alto de la proporcion de la imagen (ver mas
+ * abajo), asi que el texto ya no le aporta nada a la caja y, si se quedara
+ * ocupando lugar, le pondria un alto minimo propio que volveria a recortar la
+ * imagen en cuanto el titulo fuera largo. */
+.fecha--solo-imagen .titulo,
+.fecha--solo-imagen .city,
+.fecha--solo-imagen .date,
+.fecha--solo-imagen .btn {
+  display: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Grilla regular para las placas con texto adentro
+ *
+ * El acomodo de la portada no es una grilla: son 5 cajas de anchos distintos
+ * (487, 530, 418...) que el navegador reparte segun el largo de cada titulo.
+ * Mientras el texto lo escribe el sitio eso da igual, pero una imagen que ya
+ * trae el texto dibujado necesita una caja de forma conocida: si no, cada
+ * placa la recorta distinto y no hay manera de disenar para eso.
+ *
+ * Con flex-basis 33.333% entran 3 por fila y, como flex-grow sigue en 1, las
+ * que sobran se reparten el ancho completo de la ultima fila. O sea: se
+ * conserva el 3 arriba y 2 abajo de la portada, pero parejo.
+ * ---------------------------------------------------------------------- */
+.campus .fecha.fecha--solo-imagen {
+  flex-basis: 33.333%;
+  min-width: 0;
+  /* La proporcion es UNA sola para toda la pagina, la del formato que se le
+   * pide a las imagenes (1600 x 660). No se toma de cada imagen a proposito:
+   * si cada placa usara la suya, las filas quedarian disparejas en cuanto dos
+   * imagenes no midieran exactamente lo mismo, que es justo lo que pasa
+   * cuando las genera una herramienta (1616 x 656 en vez de 1600 x 660).
+   *
+   * Con la caja y la imagen en la misma proporcion, `cover` no recorta nada.
+   * Una imagen que venga un poco corrida pierde unos pocos pixeles por lado;
+   * una vertical se recorta mucho, que es la senal de que esta en el formato
+   * equivocado. */
+  aspect-ratio: 1600/660;
+  /* La portada monta cada placa 20px sobre la siguiente, para que las cejas
+   * de los costados se lean como un pliegue. Con una imagen eso tapa 20px del
+   * diseno, asi que las placas van pegadas. */
+  margin-right: 0;
+}
+@media only screen and (max-width: 768px) {
+  .campus .fecha.fecha--solo-imagen {
+    flex-basis: 50%;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .campus .fecha.fecha--solo-imagen {
+    flex-basis: 100%;
+    width: auto;
+  }
+}
+
+/* Sin texto encima no hay nada que contrastar, y el velo solo ensuciaria el
+ * diseno de la imagen. Especificidad 0,4,0 contra el 0,3,0 de la regla con
+ * velo, asi que gana sin depender del orden. */
+.campus .fecha.fecha--con-imagen.fecha--solo-imagen {
+  background: var(--fecha-img) center/cover no-repeat, #f2f2f2;
+}
