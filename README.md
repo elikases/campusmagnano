@@ -151,7 +151,7 @@ imagen más que a la página:
 | Modo | En `/demo2` | Disposición |
 |---|---|---|
 | Imagen de fondo + texto | La imagen va de fondo, con velo oscuro, y el sitio escribe el título, la ciudad, la fecha y el botón encima | La de la portada: cajas de anchos distintos, que los da el largo de cada título |
-| Sólo la imagen | Para imágenes que ya traen el texto dibujado adentro: sin velo y sin texto del sitio | Grilla regular: 3 arriba y 2 abajo, parejas, con la proporción de la imagen |
+| Sólo la imagen | Para imágenes que ya traen el texto dibujado adentro: sin velo y sin texto del sitio | Grilla regular de 2 por fila, con la proporción de la imagen |
 
 **Por qué la grilla regular.** El acomodo de la portada no es una grilla: son 5
 cajas de anchos distintos (487, 530, 418 px en una pantalla de 1440) que el
@@ -161,6 +161,18 @@ caja de forma conocida: si no, cada placa la recorta distinto y no hay manera de
 diseñar para eso. En este modo la placa toma el ancho de la grilla y el alto de
 la proporción, el texto se saca del layout y la imagen entra completa.
 
+Van de a **2 por fila**, y la última se queda con lo que sobre:
+
+| Fechas publicadas | Cómo quedan |
+|---|---|
+| 3 | 2 arriba y 1 abajo, centrada |
+| 4 | dos filas de 2 |
+| 5 | 2, 2 y 1 |
+
+La placa suelta de la última fila **no** se estira al ancho completo: se queda en
+su mitad y la centra el contenedor. Estirada mediría el doble que las de arriba
+y, como el alto sale de la proporción, también el doble de alto.
+
 **El formato de esas imágenes es 1600 × 660 px** (2,42:1), el mismo que usa la
 caja. Una imagen que venga un poco corrida (1616 × 656, por ejemplo) pierde unos
 pocos píxeles por lado; una vertical se recorta mucho, que es la señal de que
@@ -168,7 +180,8 @@ está en el formato equivocado. La proporción es **una sola para toda la págin
 a propósito: si cada placa usara la de su imagen, las filas quedarían disparejas
 en cuanto dos imágenes no midieran exactamente lo mismo.
 
-En celular va 1 placa por fila y en tablet 2.
+En celular va 1 placa por fila: media placa deja la imagen en unos 200 px de
+ancho y el texto que trae dibujado no se lee.
 
 En este modo el link que cubre la placa pasa a ser el enlace real (con el título
 como nombre accesible), porque el botón "Participar" ya no está a la vista.

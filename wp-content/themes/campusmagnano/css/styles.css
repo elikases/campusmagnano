@@ -1382,12 +1382,17 @@ body.dark .carrusel__dot[aria-selected=true] {
  * trae el texto dibujado necesita una caja de forma conocida: si no, cada
  * placa la recorta distinto y no hay manera de disenar para eso.
  *
- * Con flex-basis 33.333% entran 3 por fila y, como flex-grow sigue en 1, las
- * que sobran se reparten el ancho completo de la ultima fila. O sea: se
- * conserva el 3 arriba y 2 abajo de la portada, pero parejo.
+ * Van de a 2 por fila, y la ultima se queda con lo que sobre: 3 placas son 2
+ * arriba y 1 abajo, 4 son dos filas parejas, 5 son 2, 2 y 1.
+ *
+ * flex-grow en 0 (la portada lo tiene en 1) para que la placa suelta de la
+ * ultima fila NO se estire al ancho completo. Estirada mediria el doble que
+ * las de arriba y, como el alto sale de la proporcion, tambien el doble de
+ * alto: una placa gigante abajo de todo. Quedandose en su 50% la centra el
+ * justify-content del .campus y las placas se ven todas iguales.
  * ---------------------------------------------------------------------- */
 .campus .fecha.fecha--solo-imagen {
-  flex-basis: 33.333%;
+  flex: 0 0 50%;
   min-width: 0;
   /* La proporcion es UNA sola para toda la pagina, la del formato que se le
    * pide a las imagenes (1600 x 660). No se toma de cada imagen a proposito:
@@ -1404,11 +1409,8 @@ body.dark .carrusel__dot[aria-selected=true] {
    * de los costados se lean como un pliegue. Con una imagen eso tapa 20px del
    * diseno, asi que las placas van pegadas. */
   margin-right: 0;
-}
-@media only screen and (max-width: 768px) {
-  .campus .fecha.fecha--solo-imagen {
-    flex-basis: 50%;
-  }
+  /* En celular una sola por fila: media placa de 50% deja la imagen en unos
+   * 200px de ancho y el texto que trae dibujado no se lee. */
 }
 @media only screen and (max-width: 480px) {
   .campus .fecha.fecha--solo-imagen {

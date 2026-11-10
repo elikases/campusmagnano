@@ -673,12 +673,17 @@ proporciones distintas: 2,15:1, 2,33:1, 3,19:1... Una imagen con el texto
 dibujado adentro se recorta distinto en cada una, y no hay diseño que aguante
 eso.
 
-Con `flex-basis: 33.333%` entran 3 por fila y, como `flex-grow` sigue en 1, las
-que sobran se reparten el ancho completo de la última fila: se conserva el 3
-arriba y 2 abajo, pero parejo. El alto sale de `aspect-ratio`, no del contenido,
-así que el texto ya no aporta nada y se saca con `display: none`. Si se quedara
-ocupando lugar le pondría un alto mínimo propio a la caja, que volvería a
-recortar la imagen en cuanto el título fuera largo.
+Van de a 2 por fila (`flex: 0 0 50%`) y la última se queda con lo que sobre: 3
+placas son 2 arriba y 1 abajo, 4 son dos filas parejas, 5 son 2, 2 y 1. El alto
+sale de `aspect-ratio`, no del contenido, así que el texto ya no aporta nada y
+se saca con `display: none`. Si se quedara ocupando lugar le pondría un alto
+mínimo propio a la caja, que volvería a recortar la imagen en cuanto el título
+fuera largo.
+
+`flex-grow` va en 0, al revés que en la portada, para que la placa suelta de la
+última fila no se estire al ancho completo: estirada mediría el doble que las de
+arriba y, como el alto sale de la proporción, también el doble de alto. En su
+50% la centra el `justify-content` del `.campus`.
 
 **La proporción es una sola para toda la página** (`1600 / 660`, el formato que
 se le pide a las imágenes) y no la de cada imagen: si cada placa usara la suya,
