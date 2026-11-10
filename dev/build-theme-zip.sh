@@ -25,7 +25,7 @@ set -euo pipefail
 
 SLUG="${1:-placas-demo}"
 NOMBRE="${2:-Placas Demo}"
-DESCRIPCION="${3:-PROPUESTA, no es el theme del sitio. Muestra las fechas como un carrusel de placas con imagen propia, en la pagina /demo. El theme en uso es Campusmagnano.}"
+DESCRIPCION="${3:-PROPUESTA, no es el theme del sitio. Agrega dos paginas con las fechas como placas con imagen propia: /demo (carrusel o grilla) y /demo2 (con la disposicion de la portada). El theme en uso es Campusmagnano.}"
 DEST="${DEST:-$HOME/Desktop/${SLUG}.zip}"
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
