@@ -79,13 +79,15 @@ prácticamente no aporta estilos. El diseño real está todo en `css/styles.css`
 | Archivo | Qué renderiza |
 |---|---|
 | `home.php` | La portada completa (fechas, acordeón, coachs, modalidades) |
-| `page-demo.php` | La página `/demo`: las placas en un carrusel (ver más abajo) |
+| `page-demo.php` | La página `/demo`: las placas en un carrusel o en grilla (ver más abajo) |
+| `page-demo2.php` | La página `/demo2`: las placas con la disposición exacta de la portada, con imagen propia (ver más abajo) |
 | `single-event.php` | El detalle de cada fecha, con el formulario de inscripción |
-| `header.php` / `footer.php` | Cabecera con logo; pie con redes. El switch de tema oscuro **no** se muestra en la portada ni en `/demo` |
+| `header.php` / `footer.php` | Cabecera con logo; pie con redes. El switch de tema oscuro **no** se muestra en la portada ni en los demos |
 | `functions.php` | Registra los 4 custom post types y sus meta boxes |
 
 El resto (`index.php`, `single.php`, `page.php`, `archive.php`, `search.php`,
-`404.php`, `template-parts/`, `inc/`) es Underscores sin modificar.
+`404.php`, `inc/`) es Underscores sin modificar. En `template-parts/` lo único
+propio es `placa.php`, la placa del carrusel y de la grilla de `/demo`.
 
 La portada se sirve por `home.php` porque WordPress la trata como el índice de
 entradas. No existe `front-page.php`.
@@ -102,7 +104,8 @@ Lo que se puede administrar sin tocar código:
 |---|---|
 | Cada fecha → "Imagen de la placa" | Sube la imagen de fondo de esa placa (vertical, 720×960 px o más) |
 | Cada fecha → "Mostrar en la placa" | Imagen de fondo + texto, o sólo la imagen (clickeable) |
-| Página "Demo Slider" → "Opciones del slider" | Placas por vista, flechas, puntos, vuelta al final, movimiento automático e intervalo |
+| Página "Demo Slider" → "Mostrar las placas" | En slider (carrusel) o en grilla: todas las placas a la vez, sin desplazamiento ni controles |
+| Página "Demo Slider" → "Opciones del slider" | Placas por vista, flechas, puntos, vuelta al final, movimiento automático e intervalo (sólo en modo slider) |
 
 En los dos modos, el clic en cualquier punto de la placa lleva al mismo lugar
 que el botón "Participar": el formulario de esa fecha.
@@ -110,14 +113,73 @@ que el botón "Participar": el formulario de esa fecha.
 Si una fecha no tiene imagen, la placa se ve como en la portada. Si está en modo
 "sólo la imagen" pero no tiene imagen, cae a modo texto.
 
-Archivos de la feature: `page-demo.php`, `inc/placas.php`, `js/carrusel.js` y
-`sass/_carrusel.scss`. La spec completa, con las decisiones y su porqué, está en
+En modo grilla las placas entran todas en una fila en desktop (hasta 5), 2 en
+tablet y 1 en celular, y el `js/carrusel.js` ni se encola: el markup no tiene
+carrusel que inicializar.
+
+Archivos de la feature: `page-demo.php`, `template-parts/placa.php`,
+`inc/placas.php`, `js/carrusel.js` y `sass/_carrusel.scss`. La spec completa, con las decisiones y su porqué, está en
 `docs/spec-slider-placas.md`.
 
 El bloque CSS se llama `.carrusel` y no `.slider` porque `_switch.scss` ya usa
 `.slider` para el switch de tema oscuro del header.
 
-La página se sirve con `noindex, follow`: es una propuesta, y si Google la
+## Página de demo 2: las placas como en la portada
+
+`http://localhost:8080/demo2` — la misma sección de fechas, pero con la
+**disposición exacta de la portada**: reusa `.campus` y `.fecha` de
+`_campus.scss`, así que el reacomodo por `flex-wrap` (en desktop entran 3 y
+bajan 2) y los cortes en mobile (2 por fila) son los mismos. Sin carrusel.
+
+Lo único que agrega sobre la portada es la imagen de cada placa, que entra como
+capa de fondo del `.fecha`:
+
+| | |
+|---|---|
+| De dónde sale | "Imagen de la placa" de cada fecha, la misma que usa `/demo` |
+| Cómo se recorta | `background-size: cover`, centrada. **La imagen conviene horizontal**: el alto de la caja lo sigue dando el texto, así que una vertical se recorta arriba y abajo |
+| Si no hay imagen | La placa queda con la ilustración del theme, igual que en la portada |
+
+Sobre la foto el texto pasa a blanco con sombra (el degradado naranja no se lee
+sobre una imagen) y se le suma un velo oscuro de abajo hacia arriba. Las cejas
+de 20px de los costados se esconden: sobre una ilustración plana se leen como un
+pliegue, sobre una foto son un tajo blanco.
+
+El modo de cada fecha ("Mostrar en la placa") también vale acá, y describe a la
+imagen más que a la página:
+
+| Modo | En `/demo2` | Disposición |
+|---|---|---|
+| Imagen de fondo + texto | La imagen va de fondo, con velo oscuro, y el sitio escribe el título, la ciudad, la fecha y el botón encima | La de la portada: cajas de anchos distintos, que los da el largo de cada título |
+| Sólo la imagen | Para imágenes que ya traen el texto dibujado adentro: sin velo y sin texto del sitio | Grilla regular: 3 arriba y 2 abajo, parejas, con la proporción de la imagen |
+
+**Por qué la grilla regular.** El acomodo de la portada no es una grilla: son 5
+cajas de anchos distintos (487, 530, 418 px en una pantalla de 1440) que el
+navegador reparte según el largo de cada título. Mientras el texto lo escribe el
+sitio eso da igual, pero una imagen que ya trae el texto dibujado necesita una
+caja de forma conocida: si no, cada placa la recorta distinto y no hay manera de
+diseñar para eso. En este modo la placa toma el ancho de la grilla y el alto de
+la proporción, el texto se saca del layout y la imagen entra completa.
+
+**El formato de esas imágenes es 1600 × 660 px** (2,42:1), el mismo que usa la
+caja. Una imagen que venga un poco corrida (1616 × 656, por ejemplo) pierde unos
+pocos píxeles por lado; una vertical se recorta mucho, que es la señal de que
+está en el formato equivocado. La proporción es **una sola para toda la página**
+a propósito: si cada placa usara la de su imagen, las filas quedarían disparejas
+en cuanto dos imágenes no midieran exactamente lo mismo.
+
+En celular va 1 placa por fila y en tablet 2.
+
+En este modo el link que cubre la placa pasa a ser el enlace real (con el título
+como nombre accesible), porque el botón "Participar" ya no está a la vista.
+
+Archivos de la feature: `page-demo2.php` y `sass/_demo2.scss`. El clic en
+cualquier punto de la placa lleva al formulario de esa fecha, igual que en
+`/demo`.
+
+## Los demos fuera de los buscadores
+
+Las dos páginas se sirven con `noindex, follow`: es una propuesta, y si Google la
 indexa compite con la portada por las mismas búsquedas.
 
 Dos detalles que no son obvios al leer el código:

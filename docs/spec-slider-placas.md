@@ -583,3 +583,121 @@ switch ya no se renderiza.
 Se empaqueta como **Placas Demo** (carpeta `placas-demo`) con
 `dev/build-theme-zip.sh`, para instalarlo al lado del de producción sin pisarlo
 y poder volver atrás con un clic. Ver el README.
+
+### 14.8 Ver el demo sin el slider
+
+La spec daba por sentado que el demo era el carrusel, así que las únicas
+opciones eran sus controles: no había forma de apagar el slider y ver las
+placas quietas. Para comparar la propuesta contra la portada hacía falta eso.
+
+Se agregó la meta `_slider_vista` (`slider` | `grilla`, default `slider`) en la
+página del demo, con dos radios arriba del resto de las opciones. En `grilla`
+la plantilla no emite carrusel: ni viewport, ni `scroll-snap`, ni flechas, ni
+puntos, ni autoplay. Las placas van en un `<ul class="placas-grilla">` que es
+un grid de tantas columnas como fechas publicadas (topadas en 5), con los
+mismos cortes responsive que el carrusel: 2 en tablet y 1 en celular.
+
+**Por qué una meta nueva y no un valor de `_slider_visibles`:** subir "placas
+por vista" hasta igualar la cantidad de fechas ya desactivaba los controles por
+`$desplazable`, pero sólo en desktop — en tablet y celular el ancho de la placa
+está fijo en 2 y 1 por CSS, así que ahí seguía desplazándose, encima sin
+flechas ni puntos para guiarlo. El default `slider` deja las páginas que ya
+existían viéndose igual.
+
+Tres consecuencias que no son obvias:
+
+- El markup de la placa se mudó a `template-parts/placa.php`. Las dos vistas
+  muestran la misma placa y sólo cambia el contenedor; duplicarlo en la
+  plantilla obligaba a tocar dos lugares en cada ajuste de diseño.
+- Los fondos ilustrados de las placas **sin** imagen propia se aplicaban con
+  `.carrusel__slide:nth-child(...)`, que en grilla no matchea. Los tres
+  selectores pasaron a `:is(.carrusel__slide, .placas-grilla__item)`: los dos
+  argumentos son clases, así que la especificidad no cambia.
+- `--columnas-desktop` llega inline y el layout consume `--columnas`, derivada
+  de ella, por lo mismo que `--visibles-desktop` en el carrusel: una custom
+  property inline no se puede sobreescribir desde una media query.
+
+### 14.9 `/demo2`: la portada con imagen en las placas
+
+Pedido aparte del anterior: una segunda página donde las placas se vean con la
+disposición de la portada —las 5 acomodándose 3 y 2— y donde igual se pueda
+cargar una imagen por placa, sin que eso cambie cómo se ve en desktop ni en
+mobile.
+
+`page-demo2.php` + `sass/_demo2.scss`, con la página `demo2`.
+
+**Reusa `.campus` y `.fecha`,** al revés de lo que decidió la sección 3 para el
+carrusel. Ahí el namespace propio se justificaba porque los márgenes negativos
+y los fondos por `nth-child` de `.fecha` pelean con `scroll-snap`. Acá no hay
+desplazamiento y el requisito es justamente la fidelidad con la portada:
+cualquier copia del layout se despegaría del original en el primer ajuste. El
+reacomodo 3 + 2 no está cableado en ningún lado — sale de `flex-grow: 1` sin
+`flex-basis` y el `flex-wrap` del contenedor, o sea del ancho del contenido. Por
+eso se reproduce solo: el markup y el texto son los mismos.
+
+**La imagen va como capa de fondo del `.fecha`, no como `<img>`.** Así la caja
+no cambia de tamaño: el alto lo sigue dando el texto, como en la portada. Con
+`cover` centrada, una foto horizontal entra sin deformarse. Es lo contrario de
+`.placa--imagen` del carrusel, que fija `aspect-ratio: 4/5` y usa
+`object-fit: contain` para no decapitar un flyer vertical (14.1): ahí la placa
+*es* la imagen, acá la imagen es el fondo de una placa que ya tiene su forma.
+
+**El velo de contraste va en el `background` y no en un `::after`,** porque
+`_campus.scss` ya ocupa `::after` y `::before` con las cejas de 20px de los
+costados. Tres capas en una sola declaración: velo, imagen y color de base por
+si la imagen falla.
+
+**Las cejas se esconden cuando hay imagen.** Son dos franjas claras pegadas a
+los bordes dibujadas sobre el fondo: sobre una ilustración plana se leen como un
+pliegue, sobre una foto son un tajo blanco. Las placas `nth-child(odd)` de la
+portada ya las esconden por lo mismo.
+
+**Especificidad:** los overrides son `.campus .fecha.fecha--con-imagen` (0,3,0),
+la misma que `.campus .fecha:nth-child(odd)` de `_campus.scss`, y
+`demo2.scss` se importa después en `styles.scss`, así que ganan por orden. Sin
+`!important` ni ids, que son más difíciles de desarmar después.
+
+**El modo por fecha (`_placa_modo`) se respeta, pero significa otra cosa.** En
+`/demo` "sólo la imagen" reemplaza la placa por la imagen entera, con su propia
+proporción. Acá la proporción de la caja es intocable, así que el modo decide
+otra cosa: si la imagen ya trae el texto dibujado adentro. En ese caso no se
+dibuja el velo y el texto del sitio se esconde con `visibility: hidden`.
+
+**Esas placas dejan la disposición de la portada y pasan a una grilla regular.**
+Primero se intentó conservarla escondiendo el texto con `visibility: hidden`,
+para que siguiera ocupando su lugar y dando la caja. No alcanza, y el motivo es
+de fondo: la disposición de la portada **no es una grilla**. Son 5 cajas de
+anchos distintos —487, 530 y 418 px arriba; 712 y 725 abajo, en una pantalla de
+1440— que el navegador reparte según el largo de cada título. O sea, cinco
+proporciones distintas: 2,15:1, 2,33:1, 3,19:1... Una imagen con el texto
+dibujado adentro se recorta distinto en cada una, y no hay diseño que aguante
+eso.
+
+Con `flex-basis: 33.333%` entran 3 por fila y, como `flex-grow` sigue en 1, las
+que sobran se reparten el ancho completo de la última fila: se conserva el 3
+arriba y 2 abajo, pero parejo. El alto sale de `aspect-ratio`, no del contenido,
+así que el texto ya no aporta nada y se saca con `display: none`. Si se quedara
+ocupando lugar le pondría un alto mínimo propio a la caja, que volvería a
+recortar la imagen en cuanto el título fuera largo.
+
+**La proporción es una sola para toda la página** (`1600 / 660`, el formato que
+se le pide a las imágenes) y no la de cada imagen: si cada placa usara la suya,
+las filas quedarían disparejas en cuanto dos imágenes no midieran exactamente lo
+mismo, que es justo lo que pasa cuando las genera una herramienta — pedimos
+1600 × 660 y devuelve 1616 × 656. Con la caja y la imagen en la misma
+proporción, `cover` no recorta nada.
+
+También se pone `margin-right: 0`: la portada monta cada placa 20px sobre la
+siguiente para que las cejas de los costados se lean como un pliegue, y sobre
+una imagen eso tapa 20px del diseño.
+
+Efecto colateral: con el texto escondido, el botón "Participar" tampoco está en
+el árbol de accesibilidad, y era el que le daba nombre al enlace. En ese modo el
+`.fecha__cover` deja de ser `aria-hidden` y pasa a ser el enlace de verdad, con
+el título como `aria-label`.
+
+La caja "Opciones del slider" no se registra en esta página: no hay slider, así
+que ni siquiera tiene sentido el mensaje que explica cómo activarla. El
+`noindex` y el switch de tema oscuro se unificaron en `cm_es_pagina_demo()`,
+que cubre los dos demos.
+
