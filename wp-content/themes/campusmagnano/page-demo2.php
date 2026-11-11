@@ -36,7 +36,7 @@ $total = $fechas->found_posts;
 <a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/+5493513281636?text=Hola!"></a>
 
 <section>
-	<h1><?php bloginfo( 'name' ); ?></h1>
+	<h1 class="titulo-sitio"><?php bloginfo( 'name' ); ?></h1>
 
 	<?php if ( ! $total ) : ?>
 
@@ -56,10 +56,10 @@ $total = $fechas->found_posts;
 
 			// "Solo la imagen" (la opcion "Mostrar en la placa" de cada fecha):
 			// para las placas cuyo texto ya viene dibujado adentro de la imagen.
-			// El texto del sitio no se saca del markup, se esconde con
-			// visibility: hidden, porque es el que le da el alto y el ancho a la
-			// caja: sin el, la placa se derrumba y el acomodo 3 + 2 de la portada
-			// se desarma. Ver sass/_demo2.scss.
+			// El texto del sitio se esconde con display: none y la caja pasa a
+			// medir por su cuenta: 50% de ancho y la proporcion fija de
+			// aspect-ratio. Por eso estas placas van de a dos por fila y no
+			// siguen el acomodo 3 + 2 del resto. Ver sass/_demo2.scss.
 			$solo_imagen = $imagen_id && 'imagen' === cm_placa_modo( $id );
 
 			// La portada agrega `unafecha` cuando hay una sola fecha, para
@@ -98,9 +98,9 @@ $total = $fechas->found_posts;
 				// nombre.
 				?>
 				<?php if ( $solo_imagen ) : ?>
-					<a class="fecha__cover" href="<?php echo esc_url( $permalink ); ?>" aria-label="<?php echo esc_attr( get_the_title() ); ?>"></a>
+					<a class="fecha__cover" href="<?php echo esc_url( $permalink ); ?>" aria-label="<?php echo esc_attr( get_the_title() ); ?>"<?php echo cm_atributos_medicion( $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ya vienen escapados. ?>></a>
 				<?php else : ?>
-					<a class="fecha__cover" href="<?php echo esc_url( $permalink ); ?>" tabindex="-1" aria-hidden="true"></a>
+					<a class="fecha__cover" href="<?php echo esc_url( $permalink ); ?>" tabindex="-1" aria-hidden="true"<?php echo cm_atributos_medicion( $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ya vienen escapados. ?>></a>
 				<?php endif; ?>
 
 				<p class="titulo"><?php the_title(); ?></p>
@@ -117,7 +117,7 @@ $total = $fechas->found_posts;
 					<p class="date"><?php echo esc_html( $date ); ?></p>
 				<?php endif; ?>
 
-				<a class="btn quiero" href="<?php echo esc_url( $permalink ); ?>">Participar</a>
+				<a class="btn quiero" href="<?php echo esc_url( $permalink ); ?>"<?php echo cm_atributos_medicion( $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ya vienen escapados. ?>>Participar</a>
 			</div>
 
 			<?php

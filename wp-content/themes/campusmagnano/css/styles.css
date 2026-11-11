@@ -159,6 +159,59 @@ small {
   font-size: 12px;
 }
 
+.titulo-sitio {
+  font-size: clamp(32px, 7vw, 76px);
+  line-height: 0.95;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #000;
+  margin: 0 0 40px;
+  padding-bottom: 24px;
+  position: relative;
+  text-wrap: balance;
+}
+.titulo-sitio::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: clamp(80px, 12vw, 140px);
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, orange, #f37c20);
+}
+@media only screen and (max-width: 768px) {
+  .titulo-sitio {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+  .titulo-sitio::after {
+    height: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .titulo-sitio {
+    animation: titulo-sitio-entra 0.6s ease-out both;
+  }
+  .titulo-sitio::after {
+    animation: titulo-sitio-barra 0.5s ease-out 0.35s both;
+  }
+}
+@keyframes titulo-sitio-entra {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes titulo-sitio-barra {
+  from {
+    transform: translateX(-50%) scaleX(0);
+  }
+}
 body {
   min-width: 320px;
   display: grid;

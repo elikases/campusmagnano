@@ -706,3 +706,85 @@ que ni siquiera tiene sentido el mensaje que explica cómo activarla. El
 `noindex` y el switch de tema oscuro se unificaron en `cm_es_pagina_demo()`,
 que cubre los dos demos.
 
+
+### 14.10 El título del sitio, con peso visual
+
+El `<h1>` de la portada y de los dos demos sale de `bloginfo('name')`, o sea del
+Título del sitio de Ajustes → Generales. Venía con el `h1` base de
+`_fonts.scss`: 38px, `font-weight: lighter`, centrado. Arriba de cinco placas
+llenas de color se perdía.
+
+El tratamiento nuevo vive en `sass/_titulo-sitio.scss` y cuelga de una clase
+propia, `.titulo-sitio`, que se agregó a los tres `<h1>` (`home.php`,
+`page-demo.php`, `page-demo2.php`).
+
+**Por qué una clase y no el tag.** El `h1` de `_fonts.scss` lo usan también
+`single-event.php`, `content-page.php`, `archive.php`, `search.php` y `404.php`.
+Un título de 76px en mayúsculas sirve como cabecera de portada y estorba en
+todos esos otros lugares.
+
+Decisiones:
+
+- **`clamp(32px, 7vw, 76px)`** en lugar de tres media queries. El tamaño sigue
+  al ancho de la ventana y no da saltos en los breakpoints. Verificado a 1440,
+  430 y 360px: "SUMMER CAMP" entra en una línea en los tres y no desborda.
+- **Las mayúsculas las pone `text-transform`**, no el contenido. El título
+  guardado en Ajustes sigue escrito normal, que es lo que leen Google y la
+  pestaña del navegador.
+- **Negro y no el naranja de la marca.** Las placas de abajo ya son naranjas; un
+  título naranja gigante se funde con ellas. La barra del `::after` alcanza para
+  la marca sin competir.
+- **La barra es decorativa** y por eso es un pseudo-elemento: no entra en el
+  árbol de accesibilidad.
+- **La animación de entrada** (fade-up de 0,6s, después la barra) va envuelta en
+  `@media (prefers-reduced-motion: no-preference)`.
+
+Pendiente: `$font-primary` declara Montserrat pero el theme nunca la carga, así
+que el peso 800 lo falsea el navegador. Ver «Deuda abierta» en el README.
+
+### 14.11 Medir el clic en cada campus
+
+El pixel de Meta (`709047704796888`) ya estaba en `header.php`, detrás de
+`wp_get_environment_type() === 'production'`, pero sólo disparaba `PageView`: se
+sabía cuánta gente entraba al sitio y nada sobre qué campus le interesaba.
+
+Ahora cada enlace que lleva a la página de una fecha manda un `InitiateCheckout`
+con el campus adentro. El dato viaja en el propio enlace, en `data-campus` y
+`data-campus-id`, porque no se puede deducir del DOM: el título está en un `<p>`
+suelto al lado del botón y en las placas de sólo imagen ni siquiera se muestra.
+
+Archivos: `cm_atributos_medicion()` en `inc/placas.php`, `js/medicion.js`, y el
+encolado en `campusmagnano_scripts()` acotado a portada y demos.
+
+**Qué se instrumentó.** Los botones y también los enlaces que cubren la placa.
+En el modo "sólo la imagen" el botón "Participar" está en `display: none`, así
+que medir nada más el botón habría dejado justo esas fechas en cero. Botón y
+cover son hermanos y no están anidados, así que un clic encuentra uno solo con
+`closest()` y manda un evento, no dos.
+
+**Por qué `InitiateCheckout`.** Es un evento estándar de Meta, y los estándar se
+pueden usar para optimizar campañas y armar públicos de remarketing. Uno con
+nombre inventado sólo se puede mirar en el informe. El clic no es una
+inscripción, pero sí el arranque del proceso, que es lo que el evento describe.
+
+**Por qué el nombre lleva la ciudad.** `get_the_title()` solo no alcanza: hay
+dos fechas que se llaman "SUMMER CAMP" y en el desglose de Meta quedarían
+sumadas en una línea. El nombre se arma con el título más `event_location`, y
+`content_ids` lleva el ID de WordPress como clave que no se repite.
+
+**Por qué el clic espera 250ms.** El navegador cancela las peticiones de una
+página que se está yendo, y el evento se perdería justo en el clic que más
+interesa medir. Con Cmd, Ctrl, Shift o Alt no se frena nada: esa pestaña no se
+va a ningún lado. Si no hay `fbq` —local, o un visitante con bloqueador— el
+script no toca la navegación.
+
+Verificado con un pixel simulado: un evento por clic con los parámetros
+correctos, la navegación frenada en el enlace del campus, los enlaces sin
+`data-campus` intactos y, sin pixel, el enlace sin frenar.
+
+**El techo.** El formulario de cada fecha es un Google Form embebido en un
+iframe (`event_iframe`). El pixel no puede ver adentro de un iframe de otro
+dominio y Google Forms no permite redirigir a una URL propia al enviar, así que
+la inscripción no se mide: la medición llega hasta la puerta del formulario.
+Para medirla haría falta reemplazar el formulario por uno del sitio y disparar
+`Lead`, o mandar la conversión desde el servidor con la API de Conversiones.

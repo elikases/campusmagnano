@@ -1,7 +1,7 @@
 # campusmagnano
 
 WordPress + Docker para el desarrollo del theme de [campusmagnano.com](https://campusmagnano.com)
-("Campus de Basketball").
+("Summer camp").
 
 El repositorio contiene el WordPress completo: el core vive en la raíz y se monta
 directamente sobre el docroot del contenedor.
@@ -33,7 +33,7 @@ La base de datos no está versionada. En un clon nuevo:
 # 1. Instalar WordPress
 docker compose exec -T wpcli wp core install \
   --url="http://localhost:8080" \
-  --title="Campus de Basketball" \
+  --title="Summer camp" \
   --admin_user="admin" --admin_password="admin" \
   --admin_email="tu@email.com" --skip-email
 
@@ -190,6 +190,30 @@ Archivos de la feature: `page-demo2.php` y `sass/_demo2.scss`. El clic en
 cualquier punto de la placa lleva al formulario de esa fecha, igual que en
 `/demo`.
 
+## El título del sitio
+
+El `<h1>` de la portada, `/demo` y `/demo2` es el **Título del sitio** de
+Ajustes → Generales (`bloginfo('name')`), no un texto del theme. Cambiarlo ahí
+lo cambia en las tres páginas y en la pestaña del navegador.
+
+Los tres llevan `class="titulo-sitio"` y el estilo vive en
+`sass/_titulo-sitio.scss`. Va sobre la clase y no sobre el tag `h1` a propósito:
+ese mismo `h1` lo usan las fechas, las páginas sueltas, el buscador y el 404, y
+ahí un título gigante en mayúsculas no tiene sentido.
+
+| | |
+|---|---|
+| Tamaño | `clamp(32px, 7vw, 76px)` — fluido, sin media queries y sin saltos entre breakpoints |
+| Mayúsculas | Por CSS (`text-transform`), no en el contenido: en Ajustes el título sigue escrito normal, que es como lo lee Google y como aparece en la pestaña |
+| La barra naranja | Un `::after`, decorativa, fuera del árbol de accesibilidad |
+| Animación | Fade-up de 0,6 s, envuelto en `prefers-reduced-motion: no-preference` |
+
+El color es negro y no el naranja de la marca porque abajo hay cinco placas
+llenas de naranja: un título naranja gigante se mezcla con ellas. La barra
+alcanza para la marca.
+
+El peso 800 que pide el estilo hoy lo falsea el navegador — ver «Deuda abierta».
+
 ## Los demos fuera de los buscadores
 
 Las dos páginas se sirven con `noindex, follow`: es una propuesta, y si Google la
@@ -207,6 +231,80 @@ Dos detalles que no son obvios al leer el código:
 - **`css/styles.css` se versiona con `filemtime()`** en `header.php`. La hoja
   está cableada a mano ahí (no encolada), y sin versión el navegador se queda
   con la copia vieja después de cada despliegue.
+
+## Medición: el pixel de Meta
+
+El pixel `709047704796888` está cableado en `header.php`, dentro del `<head>`, y
+**sólo se emite en producción**:
+
+```php
+<?php if ( 'production' === wp_get_environment_type() ) : ?>
+```
+
+`docker-compose.yml` define `WP_ENVIRONMENT_TYPE = 'development'`, así que desde
+local no dispara: si lo hiciera, cada recarga durante el desarrollo ensuciaría
+las métricas con visitas que no existen. Producción no define nada y WordPress
+cae a `production`.
+
+### Clics por campus
+
+Cada enlace que lleva a la página de una fecha trae `data-campus` y
+`data-campus-id`, que pone `cm_atributos_medicion()` (`inc/placas.php`).
+`js/medicion.js` escucha el clic y manda a Meta:
+
+```js
+fbq('track', 'InitiateCheckout', {
+  content_name: 'SUMMER CAMP – CÓRDOBA - Córdoba',
+  content_ids: ['25'],
+  content_category: 'campus'
+})
+```
+
+Están instrumentados **todos los caminos de entrada**, no sólo el botón:
+
+| Dónde | Qué enlaces |
+|---|---|
+| Portada | `.btn.quiero` |
+| `/demo2` | `.btn.quiero` y el `.fecha__cover` que cubre la placa |
+| `/demo` | `.btn.placa__btn`, el `.placa__cover` y la placa entera cuando es sólo imagen |
+
+El cover no es opcional: en las placas de sólo imagen el botón "Participar" está
+en `display: none`, así que justo esas fechas no medirían nada. Un clic manda un
+evento y no dos — botón y cover son hermanos, no están anidados, así que
+`closest()` encuentra uno solo.
+
+Tres decisiones que no se ven leyendo el código:
+
+- **El nombre lleva la ciudad pegada** (`get_the_title()` + `event_location`)
+  porque hay dos fechas que se llaman "SUMMER CAMP" y en el informe de Meta
+  quedarían sumadas en una sola línea. `content_ids` lleva el ID de WordPress,
+  que no se repite nunca.
+- **`InitiateCheckout` y no un evento inventado**: los eventos estándar de Meta
+  sirven para optimizar campañas y armar públicos de remarketing; uno con nombre
+  propio sólo se puede mirar en el informe.
+- **El clic frena la navegación 250 ms.** El navegador cancela las peticiones de
+  una página que se está yendo, y el evento se perdería justo en el clic que más
+  interesa medir. Con Cmd/Ctrl/Shift no frena nada: esa pestaña no se va a
+  ningún lado.
+
+Sin pixel el script no hace nada y los enlaces andan normal. Es el caso de local
+y el de cualquier visitante con un bloqueador.
+
+### Lo que no se puede medir
+
+El formulario de cada fecha es un **Google Form embebido en un iframe**
+(`event_iframe`). El pixel no puede ver adentro de un iframe de otro dominio, así
+que **la inscripción en sí no se mide**: la medición llega hasta la puerta del
+formulario. Google Forms tampoco permite redirigir a una URL propia al enviar,
+que sería la otra salida.
+
+Para medir inscripciones hay dos caminos, ninguno hecho:
+
+1. Reemplazar el Google Form por un formulario en el sitio (Fluent Forms,
+   WPForms, Contact Form 7) y disparar `Lead` al enviar, con el campus adentro.
+2. Dejar el Google Form y mandar la conversión desde el servidor, con un Apps
+   Script que avise a la API de Conversiones de Meta cuando entra una respuesta
+   en la planilla.
 
 ## Subir el theme a un servidor
 
@@ -254,10 +352,15 @@ Después de instalar y activar, en el servidor hace falta:
    "Atributos de página" es opcional: WordPress sirve `page-demo.php` por el
    slug igual, y la caja "Opciones del slider" también se activa por el slug (al
    crear la página hay que guardarla una vez para que el slug exista).
-3. Subir los flyers en cada fecha y elegir el modo en "Mostrar en la placa".
+3. Crear una página con slug `demo2`. La plantilla **Demo 2 (como la
+   portada)** también es opcional: WordPress sirve `page-demo2.php` por el slug.
+4. Subir los flyers en cada fecha y elegir el modo en "Mostrar en la placa".
+5. Si hace falta, cambiar el **Título del sitio** en Ajustes → Generales: es el
+   `<h1>` de la portada y de los dos demos.
 
-Los pasos 2 y 3 son obligatorios: la página vive en la base de datos y los
-flyers en `wp-content/uploads/`, ninguno de los dos viaja en el theme.
+Los pasos 2 a 5 son obligatorios: las páginas viven en la base de datos, los
+flyers en `wp-content/uploads/` y el título en las opciones. Nada de eso viaja
+en el theme.
 
 ## Arreglado acá, pendiente de desplegar
 
@@ -284,6 +387,12 @@ producción.
 
 ## Deuda abierta
 
+- **Montserrat no está cargada.** `_config.scss` declara
+  `$font-primary: "Montserrat"` pero el theme no trae ni un `@font-face` ni un
+  link a Google Fonts, así que todo el sitio cae a la tipográfica del sistema y
+  los pesos (el 800 del título, el `lighter` de los h1/h2) los falsea el
+  navegador. Cargarla es el salto visual más grande que queda disponible;
+  implica un pedido más a Google Fonts.
 - En producción no hay ningún menú de navegación funcional: los items quedaron
   huérfanos y en borrador.
 - `sass/_campus.scss` repite `align-items: start` y `padding: 30px 40px` dos

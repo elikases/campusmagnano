@@ -159,6 +159,13 @@ function campusmagnano_scripts() {
         && 'slider' === cm_slider_vista( get_queried_object_id() ) ) {
         wp_enqueue_script( 'campusmagnano-carrusel', get_template_directory_uri() . '/js/carrusel.js', array(), _S_VERSION, true );
     }
+
+    // La medicion de clics en las fechas solo tiene sentido donde hay placas:
+    // la portada y las dos paginas de demo. El script no hace nada si no
+    // encuentra el pixel, asi que en local queda inerte.
+    if ( is_front_page() || is_home() || cm_es_pagina_demo() ) {
+        wp_enqueue_script( 'campusmagnano-medicion', get_template_directory_uri() . '/js/medicion.js', array(), _S_VERSION, true );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'campusmagnano_scripts' );
 

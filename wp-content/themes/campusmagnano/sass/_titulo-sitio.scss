@@ -1,0 +1,82 @@
+// El titulo del sitio tal como aparece en la portada, en /demo y en /demo2.
+//
+// Va con clase propia y no sobre el tag h1 a proposito: el h1 de _fonts.scss
+// lo usan tambien las fechas, las paginas sueltas, el buscador y el 404, y ahi
+// un titulo gigante en mayusculas no tiene sentido. Solo el nombre del sitio
+// como cabecera de portada recibe este tratamiento.
+.titulo-sitio {
+    // clamp() da el tamanio fluido: crece con el ancho de la ventana pero
+    // nunca baja de 32px ni pasa de 76px. Evita tener que repetir el
+    // font-size en cada breakpoint y no deja saltos entre uno y otro.
+    font-size: clamp(32px, 7vw, 76px);
+    line-height: 0.95;
+    font-weight: 800;
+    // El texto en mayusculas sale del CSS y no del contenido: en Ajustes el
+    // titulo sigue escrito normal, que es como lo lee Google y como aparece
+    // en la pestania del navegador.
+    text-transform: uppercase;
+    // Tracking negativo: a este tamanio las letras quedan sueltas con el
+    // espaciado normal.
+    letter-spacing: -0.03em;
+    text-align: center;
+    color: $color-dark;
+    // Reemplaza el margen del h1 base, que esta pensado para 38px.
+    margin: 0 0 40px;
+    padding-bottom: 24px;
+    position: relative;
+    // Si el titulo llega a ocupar dos lineas, las reparte parejas en lugar de
+    // dejar una sola palabra colgando abajo. Donde no esta soportado se
+    // ignora y el titulo corta como siempre.
+    text-wrap: balance;
+
+    // La barra naranja debajo del titulo. Es decorativa, por eso va en un
+    // pseudo-elemento y no en el marcado: un lector de pantalla no la anuncia.
+    &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: clamp(80px, 12vw, 140px);
+        height: 6px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, orange, $color-primary);
+    }
+
+    @include tablet {
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+
+        &::after {
+            height: 4px;
+        }
+    }
+}
+
+// La entrada del titulo. Va separada para que se pueda sacar de una sin tocar
+// el resto, y solo corre si la persona no pidio menos movimiento en el sistema.
+@media (prefers-reduced-motion: no-preference) {
+    .titulo-sitio {
+        animation: titulo-sitio-entra 0.6s ease-out both;
+
+        &::after {
+            animation: titulo-sitio-barra 0.5s ease-out 0.35s both;
+        }
+    }
+}
+
+@keyframes titulo-sitio-entra {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+}
+
+@keyframes titulo-sitio-barra {
+    from {
+        // La barra se dibuja de adentro hacia afuera. El translateX(-50%) se
+        // repite porque un transform pisa al otro: si se escribe solo el
+        // scaleX, la barra se va del centro.
+        transform: translateX(-50%) scaleX(0);
+    }
+}

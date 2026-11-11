@@ -26,7 +26,7 @@ if ( $cm_imagen_id ) {
 if ( 'imagen' === $cm_modo ) :
 	?>
 
-	<a class="<?php echo esc_attr( implode( ' ', $cm_clases ) ); ?>" href="<?php echo esc_url( $cm_permalink ); ?>">
+	<a class="<?php echo esc_attr( implode( ' ', $cm_clases ) ); ?>" href="<?php echo esc_url( $cm_permalink ); ?>"<?php echo cm_atributos_medicion( $cm_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ya vienen escapados. ?>>
 		<?php
 		echo wp_get_attachment_image(
 			$cm_imagen_id,
@@ -55,7 +55,7 @@ else :
 		// aria-hidden + tabindex -1 para no duplicar el enlace en un lector de
 		// pantalla: el nombre accesible lo da el boton "Participar".
 		?>
-		<a class="placa__cover" href="<?php echo esc_url( $cm_permalink ); ?>" tabindex="-1" aria-hidden="true"></a>
+		<a class="placa__cover" href="<?php echo esc_url( $cm_permalink ); ?>" tabindex="-1" aria-hidden="true"<?php echo cm_atributos_medicion( $cm_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ya vienen escapados. ?>></a>
 
 		<p class="placa__titulo"><?php echo esc_html( $cm_titulo ); ?></p>
 
@@ -77,7 +77,7 @@ else :
 			<p class="placa__date"><?php echo esc_html( $cm_date ); ?></p>
 		<?php endif; ?>
 
-		<a class="btn placa__btn" href="<?php echo esc_url( $cm_permalink ); ?>">Participar</a>
+		<a class="btn placa__btn" href="<?php echo esc_url( $cm_permalink ); ?>"<?php echo cm_atributos_medicion( $cm_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ya vienen escapados. ?>>Participar</a>
 	</div>
 
 	<?php

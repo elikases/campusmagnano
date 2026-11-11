@@ -14,7 +14,7 @@ get_header(); // Incluye el encabezado del tema
     }
 </style>
 <section>
-    <h1><?php bloginfo('name'); ?></h1>
+    <h1 class="titulo-sitio"><?php bloginfo('name'); ?></h1>
     <div class="campus">
 
     <?php
@@ -54,7 +54,10 @@ get_header(); // Incluye el encabezado del tema
         }
 
         // Agregar el enlace "Participar"
-        echo '<a class="btn quiero" href="' . esc_url($enlace_articulo) . '">Participar</a>';
+        // Los atributos de medicion los arma cm_atributos_medicion() (inc/placas.php)
+        // y vuelven ya escapados. js/medicion.js los lee para avisarle al pixel de
+        // Meta a que campus corresponde el clic.
+        echo '<a class="btn quiero" href="' . esc_url($enlace_articulo) . '"' . cm_atributos_medicion($post->ID) . '>Participar</a>';
 
         echo '</div>';
         ?>

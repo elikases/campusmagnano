@@ -52,7 +52,7 @@ $titulos = array();
 <a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/+5493513281636?text=Hola!"></a>
 
 <section>
-	<h1><?php bloginfo( 'name' ); ?></h1>
+	<h1 class="titulo-sitio"><?php bloginfo( 'name' ); ?></h1>
 
 	<?php if ( ! $total ) : ?>
 

@@ -337,3 +337,42 @@ function cm_slider_guardar( $post_id ) {
 	}
 }
 add_action( 'save_post_page', 'cm_slider_guardar' );
+
+/**
+ * Atributos HTML para medir el clic en una fecha.
+ *
+ * El pixel de Meta necesita saber que campus se clickeo, y eso no se puede
+ * deducir del DOM: el titulo esta en un <p> suelto al lado del boton y en las
+ * placas que son solo imagen ni siquiera se muestra. Asi que el dato viaja en
+ * el propio enlace y js/medicion.js lo lee de ahi.
+ *
+ * El nombre incluye la ciudad porque los titulos se repiten: hay dos fechas
+ * que empiezan con "SUMMER CAMP", y en el informe de Meta quedarian sumadas en
+ * una sola linea.
+ *
+ * Devuelve los atributos ya escapados, listos para imprimir dentro de la
+ * etiqueta <a> (incluye el espacio inicial).
+ *
+ * @param int $post_id ID de la fecha. Por defecto, la del loop.
+ * @return string
+ */
+function cm_atributos_medicion( $post_id = 0 ) {
+	$post_id = $post_id ? (int) $post_id : (int) get_the_ID();
+
+	if ( ! $post_id ) {
+		return '';
+	}
+
+	$nombre   = get_the_title( $post_id );
+	$location = get_post_meta( $post_id, 'event_location', true );
+
+	if ( ! empty( $location ) ) {
+		$nombre .= ' - ' . $location;
+	}
+
+	return sprintf(
+		' data-campus="%s" data-campus-id="%d"',
+		esc_attr( $nombre ),
+		$post_id
+	);
+}
